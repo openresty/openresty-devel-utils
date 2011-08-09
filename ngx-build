@@ -1,0 +1,101 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+if (@ARGV == 0) {
+    usage();
+}
+
+my $force = ($ARGV[0] eq '-f');
+if ($force) {
+    shift;
+}
+
+my $version = shift or
+    usage();
+
+if ($version !~ /^\d+\.\d+\.\d+$/) {
+    warn "bad nginx version number: $version\n";
+    usage();
+}
+
+my $root = `pwd`;
+chomp $root;
+my $target = "$root/work/nginx";
+
+my $home = `cd ~ && pwd`;
+chomp $home;
+
+my $build_root = "buildroot";
+if (! -d $build_root) {
+    mkdir $build_root or
+        die "failed to create directory $build_root.\n";
+}
+
+chdir $build_root or
+    die "failed to switch to directory $build_root\n";
+
+my $tarball = "nginx-$version.tar.gz";
+if ($force || ! -f $tarball || ! -d "nginx-$version") {
+    if (!-d "$home/work") {
+        mkdir "$home/work" or
+            die "failed to create directory ~/work\n";
+    }
+
+    if (-f "$home/work/$tarball") {
+        shell("cp $home/work/$tarball ./");
+
+    } else {
+        shell("axel -n10 -o $home/work/$tarball http://nginx.org/download/$tarball");
+        shell("cp $home/work/$tarball ./");
+    }
+
+    shell("tar -xzvf $tarball");
+
+    apply_patches();
+}
+
+chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+
+if ($force || ! -f "Makefile" || -C "$root/config" > -C "Makefile" ||
+        -C "$root/util/build.sh" > "Makefile")
+{
+    configure_nginx();
+}
+
+if (-f "$target/logs/nginx.pid") {
+    system("kill -QUIT `cat $target/logs/nginx.pid") == 0 or
+        warn "failed to quit existing nginx.\n";
+}
+
+shell("make -j2");
+shell("make install");
+
+sub configure_nginx {
+    system("./configure", "--prefix=$target",
+        @ARGV) == 0 or
+            die "failed to configure nginx.\n";
+}
+
+sub apply_patches {
+    shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
+
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    shell("patch -p1 -l < $root/../ngx_openresty/patches/nginx-$version-request_body_in_single_buf.patch");
+    chdir ".." or die "cannot switch to ..\n";
+
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-no_error_pages.patch");
+}
+
+sub usage {
+    die "Usage: $0 <nginx-version> <options>\n";
+}
+
+sub shell {
+    my $cmd = shift;
+    system($cmd) == 0 or
+        die "failed to run command \"$cmd\"\n";
+}
+
