@@ -12,6 +12,9 @@ ngx-build 1.0.5 \
     --with-debug \
     <other nginx configure options go here>
 
+export PATH=`pwd`/work/nginx/sbin:$PATH
+nginx -V
+
 # build a custom nginx 1.0.5 (without cache)
 ngx-build -f 1.0.5 \
     --add-module=`pwd` \
