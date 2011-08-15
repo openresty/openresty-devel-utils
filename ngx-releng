@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+wiki_file=`perl -e 'print glob "doc/*.wiki"'`
+if [ -n "$wiki_file" -a  -f "$wiki_file" ]; then
+    wiki2markdown.pl $wiki_file > README.markdown || exit 1
+    wiki2pod.pl $wiki_file > /tmp/a.pod || exit 1
+    pod2text /tmp/a.pod > README || exit 1
+fi
+
+ack '(?<=This document describes ).*-nginx-module v\d+(\.\d\S*)' README
+
+echo =======================================
+
+ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src && exit 1
+ack '.{81}' src/ngx_http_*.[ch] && exit 1
+ack '//' src/ngx_http_*.[ch] && exit 1
+ack '^master_on' t && exit 1
+ack '^ONLY' t && exit 1
+
+echo done.
+

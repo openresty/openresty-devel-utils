@@ -11,6 +11,8 @@ open my $in, $infile or
 
 my $s = do { local $/; <$in> };
 
+close $in;
+
 $s =~ s/^([^\s=][^\n]*?)\n=+\n/= $1 =\n/smg;
 $s =~ s/^([^\s=][^\n]*?)\n-+\n/== $1 ==\n/smg;
 $s =~ s{^\* \*\*(Syntax|Default|Context|Phase):\*\* ([^\n]+)}
@@ -30,9 +32,10 @@ $s =~ s{<code>((?:content|rewrite|access|set)_by_lua(?:_file|\*)?)</code>}
     {my $v = $1; $v =~ s/\*$//; "[[#$v|$v]]"}gesm;
 $s =~ s{<code>ngx\.(say|print|time|http_time|exit|send_header|redirect|exec|var\.VARIABLE|location\.capture(?:_multi)?)(?:\(\))?</code>}{[[#ngx.$1|ngx.$1]]}gsm;
 $s =~ s/\n\n\n+/\n\n/gs;
+$s =~ s{ \[ ([^\n\]]*) \] \( (https?://[^\n\)]+) \)}
+    {[$2 $1]}gmsx;
 $s =~ s{<(https?://[^>]+)>[ \t]*}{$1 }mgs;
+$s =~ s/^\d+\.\s/# /gms;
 
 print $s;
-
-close $in;
 

@@ -8,7 +8,7 @@ my @nl_counts;
 my $last_nl_count_level;
 
 my @bl_counts;
-my $last_bl_count_level;
+my $last_bl_count_level = -1;
 
 sub fmt_pos ($) {
     (my $s = $_[0]) =~ s{\#(.*)}{/"$1"};
@@ -87,24 +87,30 @@ while (<>) {
         $last_nl_count_level = $level;
         $nl_counts[$level] ||= 0;
         if ($nl_counts[$level] == 0) {
-            print "\n=over\n\n";
+            print "\n\n=over\n\n";
         }
         $nl_counts[$level]++;
         print "\n=item $nl_counts[$level].\n\n";
         print "$txt\n";
     } elsif (/^(\*+) (.*)/) {
         my ($level, $txt) = (length($1) - 1, $2);
-        if (defined $last_bl_count_level && $level != $last_bl_count_level) {
-            print "\n=back\n\n";
+        if ($level != $last_bl_count_level) {
+            if ($level < $last_bl_count_level) {
+                my $i = $level;
+                while ($i < $last_bl_count_level) {
+                    #warn "!!! $_: $level < $last_bl_count_level\n";
+                    print "\n=back\n\n";
+                    $i++;
+                }
+            } else {
+                print "\n\n=over\n\n";
+            }
         }
         $last_bl_count_level = $level;
-        $bl_counts[$level] ||= 0;
-        if ($bl_counts[$level] == 0) {
-            print "\n=over\n\n";
-        }
-        $bl_counts[$level]++;
         print "\n=item *\n\n";
         print "$txt\n";
+    } elsif (/^: (.*)/) {
+        print $1;
     } else {
         collapse_lists();
         print;
@@ -125,7 +131,7 @@ sub collapse_lists {
         print "\n=back\n\n";
         $last_bl_count_level--;
     }
-    undef $last_bl_count_level;
+    $last_bl_count_level = -1;
     undef @bl_counts;
 }
 
