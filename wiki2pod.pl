@@ -99,7 +99,7 @@ while (<>) {
                 my $i = $level;
                 while ($i < $last_bl_count_level) {
                     #warn "!!! $_: $level < $last_bl_count_level\n";
-                    print "\n=back\n\n";
+                    print "\n\n=back\n\n";
                     $i++;
                 }
             } else {
@@ -121,14 +121,14 @@ collapse_lists();
 
 sub collapse_lists {
     while (defined $last_nl_count_level && $last_nl_count_level >= 0) {
-        print "\n=back\n\n";
+        print "\n\n=back\n\n";
         $last_nl_count_level--;
     }
     undef $last_nl_count_level;
     undef @nl_counts;
 
     while (defined $last_bl_count_level && $last_bl_count_level >= 0) {
-        print "\n=back\n\n";
+        print "\n\n=back\n\n";
         $last_bl_count_level--;
     }
     $last_bl_count_level = -1;
