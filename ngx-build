@@ -15,10 +15,11 @@ if ($force) {
 my $version = shift or
     usage();
 
-if ($version !~ /^\d+\.\d+\.\d+$/) {
+if ($version !~ /^(\d+)\.(\d+)\.(\d+)$/) {
     warn "bad nginx version number: $version\n";
     usage();
 }
+my @ver = ($1, $2, $3);
 
 my $root = `pwd`;
 chomp $root;
@@ -80,13 +81,15 @@ sub configure_nginx {
 
 sub apply_patches {
     shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
-
-    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 -l < $root/../ngx_openresty/patches/nginx-$version-request_body_in_single_buf.patch");
-    chdir ".." or die "cannot switch to ..\n";
-
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-no_error_pages.patch");
+
+    unless ($ver[0] >= 1 && $ver[1] >= 1) {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
+
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 -l < $root/../ngx_openresty/patches/nginx-$version-request_body_in_single_buf.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
