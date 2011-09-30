@@ -96,13 +96,18 @@ sub configure_nginx {
 }
 
 sub apply_patches {
+    warn "applying no-pool patch...\n";
     shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
+    warn "applying no-error-page patch...\n";
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-no_error_pages.patch");
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-variable_header_ignore_no_hash.patch");
 
     unless ($ver[0] >= 1 && $ver[1] >= 1) {
+        warn "applying request-body-preread patch...\n";
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
 
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        warn "applying request-body-in-single-buf patch...\n";
         shell("patch -p1 -l < $root/../ngx_openresty/patches/nginx-$version-request_body_in_single_buf.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
