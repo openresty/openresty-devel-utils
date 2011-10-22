@@ -64,7 +64,7 @@ if ($force || ! -f $tarball || ! -d "nginx-$version") {
         shell("cp $home/work/$tarball ./");
 
     } else {
-        shell("axel -n10 -o $home/work/$tarball http://nginx.org/download/$tarball");
+        shell("axel -n2 -o $home/work/$tarball http://nginx.org/download/$tarball");
         shell("cp $home/work/$tarball ./");
     }
 
