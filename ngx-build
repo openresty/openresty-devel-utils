@@ -105,6 +105,10 @@ sub apply_patches {
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-allow_request_body_updating.patch");
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-epoll_check_stale_wev.patch");
 
+    unless (($ver[0] >= 1 && $ver[1] >= 0 && $ver[1] >= 9)) {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-log_escape_non_ascii.patch");
+    }
+
     unless (($ver[0] >= 1 && $ver[1] >= 1) || ($ver[0] >= 1 && $ver[1] >= 0 && $ver[2] >= 8)) {
         warn "applying request-body-preread patch...\n";
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
