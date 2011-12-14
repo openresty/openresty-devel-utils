@@ -15,7 +15,7 @@ ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src && exit 1
 ack '.{81}' src/ngx_http_*.[ch] && exit 1
 ack '//' src/ngx_http_*.[ch]
 ack '^master_on' t && exit 1
-ack '^ONLY' t && exit 1
+ack '\b(?:ONLY|LAST)\b' t && exit 1
 
 echo done.
 
