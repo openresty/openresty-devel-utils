@@ -16,6 +16,42 @@ ack '.{81}' src/ngx_http_*.[ch] && exit 1
 ack '//' src/ngx_http_*.[ch]
 ack '^master_on' t && exit 1
 ack '\b(?:ONLY|LAST)\b' t && exit 1
+ack -l '\r\n' t
+perl -e 'use strict; use warnings;
+    my $seen = 0;
+    my $saved;
+    my $indent;
+    for my $fname (@ARGV) {
+        open my $in, $fname or die $!;
+        while (<$in>) {
+            next if /^\s*$/ || m{^\s*/\*};
+            if (/ngx_p[cn]*alloc\b|\b[mc]alloc\b/) {
+                my $pattern = $&;
+                if (!/return\b.*?$pattern/ && !/"[^"]*$pattern/ && !/^\s+\*/) {
+                    if (/^\s+/) {
+                        $indent = $&;
+                    } else {
+                        $indent = "";
+                    }
+                    $seen = 1;
+                    $saved = $_;
+                    next;
+                }
+            }
+            if ($seen) {
+                if (/^\s+/) {
+                    if (length($&) > length($indent)) {
+                        next;
+                    }
+                }
+                if (!/\bif\b.*? == NULL/) {
+                    warn "not check NULL: $fname: line $.: $saved$_";
+                }
+            }
+            $seen = 0;
+        }
+        close $in;
+    }' src/ngx_http_*.[ch]
 
 echo done.
 
