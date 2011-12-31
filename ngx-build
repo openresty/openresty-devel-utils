@@ -97,6 +97,11 @@ sub configure_nginx {
 }
 
 sub apply_patches {
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    warn "applying subrequest cycle protection patch";
+    shell("patch -p1 -l < $root/../ngx_openresty/patches/nginx-$version-subrequest_loop.patch");
+    chdir "..";
+
     warn "applying no-pool patch...\n";
     shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
     warn "applying no-error-page patch...\n";
