@@ -20,6 +20,7 @@ if ($version !~ /^(\d+)\.(\d+)\.(\d+)$/) {
     usage();
 }
 my @ver = ($1, $2, $3);
+my $ver = sprintf("%03d%03d%03d", $1, $2, $3);
 
 my @opts;
 if (($1 == 1 && $2 == 1 && $3 >= 4)
@@ -100,11 +101,27 @@ sub apply_patches {
     shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
     warn "applying no-error-page patch...\n";
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-no_error_pages.patch");
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-variable_header_ignore_no_hash.patch");
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-named_location_clear_mods_ctx.patch");
+
+    unless ($ver ge '001001011') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-variable_header_ignore_no_hash.patch");
+    }
+
+    unless ($ver ge '001001006') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-named_location_clear_mods_ctx.patch");
+    }
+
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-allow_request_body_updating.patch");
 
-    unless (($ver[0] >= 1 && $ver[1] >= 1) || ($ver[0] >= 1 && $ver[1] >= 0 && $ver[2] >= 8)) {
+    unless ($ver ge '001001009') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-epoll_check_stale_wev.patch");
+    }
+    #shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-gzip_ok_invalid_read_fix.patch");
+
+    unless ($ver ge '001000009') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-log_escape_non_ascii.patch");
+    }
+
+    unless ($ver ge '001000008') {
         warn "applying request-body-preread patch...\n";
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
 

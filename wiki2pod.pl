@@ -110,9 +110,12 @@ while (<>) {
         print "\n=item *\n\n";
         print "$txt\n";
     } elsif (/^: (.*)/) {
-        print $1;
+        my $txt = $1;
+        $txt =~ s/\&#91;/[/g;
+        print $txt;
     } else {
         collapse_lists();
+        s/\&#91;/[/g;
         print;
     }
 }
