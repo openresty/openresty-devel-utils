@@ -12,11 +12,12 @@ ack '(?<=This document describes ).*-nginx-module v\d+(\.\d\S*)' README
 echo =======================================
 
 ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src && exit 1
-ack '.{81}' src/ngx_http_*.[ch] && exit 1
-ack '//' src/ngx_http_*.[ch]
+ack '.{81}' src/ngx_*.[ch]
+ack '//' src/ngx_*.[ch]
 ack '^master_on' t && exit 1
-ack '\b(?:ONLY|LAST)\b' t && exit 1
+ack '\b(?:ONLY|LAST)\b' t
 ack -l '\r\n' t
+ack '\(\);' src/ngx_*.h
 perl -e 'use strict; use warnings;
     my $seen = 0;
     my $saved;
@@ -51,7 +52,7 @@ perl -e 'use strict; use warnings;
             $seen = 0;
         }
         close $in;
-    }' src/ngx_http_*.[ch]
+    }' src/ngx_*.[ch]
 
 echo done.
 
