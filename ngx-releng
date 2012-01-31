@@ -18,6 +18,7 @@ ack '^master_on' t && exit 1
 ack '\b(?:ONLY|LAST)\b' t
 ack -l '\r\n' t
 ack '\(\);' src/ngx_*.h
+ack '^static .*?\(\);' src/ngx_*.[ch]
 perl -e 'use strict; use warnings;
     my $seen = 0;
     my $saved;
