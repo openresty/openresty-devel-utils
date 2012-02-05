@@ -1,0 +1,37 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+for my $file (@ARGV) {
+    my ($ext) = ($file =~ /\.(\w+)$/);
+    if (!$ext) {
+        die "no extension found for file name $file";
+    }
+
+    $ext = lc($ext);
+
+    open my $in, $file or
+        die "Cannot open $file for reading: $!\n";
+
+    my $src = do { local $/; <$in> };
+
+    close $in;
+
+    if ($ext eq 'lua') {
+        $src =~ s/^\s+--.*//gm;
+        $src =~ s/^\s*\n//gm;
+
+    } elsif ($ext eq 'h' or $ext eq 'c') {
+        $src =~ s{^\#[ \t]*if[ \t]+(?:0|\(?NGX_DEBUG\)?)[ \t]*\n.*?\n\#endif\b.*?\n}{}gms;
+        $src =~ s{/\*.*?\*/}{}gs;
+        $src =~ s{^\s*dd\(".*\n}{}gm;
+        $src =~ s/^\s*\n//gm;
+
+    } else {
+        die "unknown extension: $ext\n";
+    }
+
+    print $src;
+}
+
