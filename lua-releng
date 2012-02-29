@@ -12,10 +12,12 @@ for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua 
     # Check the sanity of each .pm file
     open my $in, $file or
         die "ERROR: Can't open $file for reading: $!\n";
+    my $found_ver;
     while (<$in>) {
         my ($ver, $skipping);
         if (/(?x) _VERSION \s* = .*? ([\d\.]*\d+) (.*? SKIP)?/) {
             my $orig_ver = $ver = $1;
+            $found_ver = 1;
             $skipping = $2;
             $ver =~ s{^(\d+)\.(\d{3})(\d{3})$}{join '.', int($1), int($2), int($3)}e;
             warn "$file: $orig_ver ($ver)\n";
@@ -28,6 +30,9 @@ for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua 
         } elsif ($ver and !$version) {
             $version = $ver;
         }
+    }
+    if (!$found_ver) {
+        warn "WARNING: No _VERSION field found in `$file`.\n";
     }
     close $in;
 
