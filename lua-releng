@@ -1,0 +1,43 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use File::Slurp qw(read_file);
+
+sub file_contains ($$);
+
+my $version;
+for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua }) {
+    # Check the sanity of each .pm file
+    open my $in, $file or
+        die "ERROR: Can't open $file for reading: $!\n";
+    while (<$in>) {
+        my ($ver, $skipping);
+        if (/(?x) _VERSION \s* = .*? ([\d\.]*\d+) (.*? SKIP)?/) {
+            my $orig_ver = $ver = $1;
+            $skipping = $2;
+            $ver =~ s{^(\d+)\.(\d{3})(\d{3})$}{join '.', int($1), int($2), int($3)}e;
+            warn "$file: $orig_ver ($ver)\n";
+        }
+
+        if ($ver and $version and !$skipping) {
+            if ($version ne $ver) {
+                die "$file: $ver != $version\n";
+            }
+        } elsif ($ver and !$version) {
+            $version = $ver;
+        }
+    }
+    close $in;
+
+    file_contains($file, "attempt to write to undeclared variable");
+}
+
+sub file_contains ($$) {
+    my ($file, $regex) = @_;
+    my $content = read_file($file);
+    #print "$content";
+    return scalar ($content =~ /$regex/);
+}
+
