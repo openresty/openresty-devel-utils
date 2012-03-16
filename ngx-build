@@ -112,6 +112,13 @@ sub apply_patches {
         shell("patch -p0 < $patch");
     }
 
+    if ($ver lt '001000014' || ($ver ge '001001000' && $ver lt '001001017')) {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        warn "applying the null char fixes security patch";
+        shell("patch -p0 -l < $root/../ngx_openresty/patches/nginx-$version-null_character_fixes.patch");
+        chdir "..";
+    }
+
     unless ($ver ge '001001015') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         warn "applying subrequest cycle protection patch";
@@ -121,6 +128,7 @@ sub apply_patches {
 
     warn "applying no-pool patch...\n";
     shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
+
     warn "applying no-error-page patch...\n";
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-no_error_pages.patch");
 
