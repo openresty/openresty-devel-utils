@@ -55,5 +55,7 @@ perl -e 'use strict; use warnings;
         close $in;
     }' src/ngx_*.[ch]
 
+ack '_log_error\(NGX_[^L]' src/ngx_*.[ch]
+
 echo done.
 
