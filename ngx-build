@@ -126,6 +126,9 @@ sub apply_patches {
         chdir "..";
     }
 
+    warn "applying the upsteram_pipelining patch...\n";
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-upstream_pipelining.patch");
+
     warn "applying no-pool patch...\n";
     shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
 
