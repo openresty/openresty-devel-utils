@@ -148,7 +148,7 @@ sub apply_patches {
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-allow_request_body_updating.patch");
 
-    unless ($ver ge '001001009') {
+    unless ($ver ge '001001009' or ($ver ge '001000012' and $ver le '001001000')) {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-epoll_check_stale_wev.patch");
     }
     #shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-gzip_ok_invalid_read_fix.patch");
