@@ -46,3 +46,5 @@ sub file_contains ($$) {
     return scalar ($content =~ /$regex/);
 }
 
+system("ack '.{81}' `find lib -name '*.lua'`");
+
