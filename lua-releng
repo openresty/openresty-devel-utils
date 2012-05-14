@@ -47,4 +47,6 @@ sub file_contains ($$) {
 }
 
 system("ack '.{81}' `find lib -name '*.lua'`");
+system(q{ack '\b(?:ONLY|LAST)\b' t});
+system(q{ack -l '\r\n' t});
 
