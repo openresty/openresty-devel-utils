@@ -51,6 +51,7 @@ if (($1 == 1 && $2 == 1 && $3 >= 4)
 
 my $cc = $ENV{NGX_BUILD_CC};
 my $optimize = $ENV{NGX_BUILD_OPT};
+my $jobs = $ENV{NGX_BUILD_JOBS} || 1;
 
 push @opts, '--with-poll_module';
 
@@ -138,7 +139,7 @@ if (-f "$target/logs/nginx.pid") {
         warn "failed to quit existing nginx.\n";
 }
 
-shell("make -j2");
+shell("make -j$jobs");
 shell("make install");
 
 sub configure_nginx {
