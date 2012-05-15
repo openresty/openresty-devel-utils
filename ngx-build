@@ -49,7 +49,45 @@ if (($1 == 1 && $2 == 1 && $3 >= 4)
     @opts = @ARGV;
 }
 
+my $cc = $ENV{NGX_BUILD_CC};
+my $optimize = $ENV{NGX_BUILD_OPT};
+
 push @opts, '--with-poll_module';
+
+my $found_cc_opt;
+my @new_opts;
+for my $opt (@opts) {
+    if (defined $cc) {
+        if ($opt =~ /^--with-cc=/) {
+            next;
+        }
+    }
+
+    if (defined $optimize) {
+        if ($opt =~ /^--with-cc-opt=/) {
+            if ($opt =~ s/-O\d?\b/$optimize/g) {
+                $found_cc_opt = 1;
+
+            } else {
+                $opt .= " $opt";
+            }
+
+            $found_cc_opt = 1;
+        }
+    }
+
+    push @new_opts, $opt;
+}
+
+@opts = @new_opts;
+
+if (defined $cc) {
+    push @opts, "--with-cc=$cc";
+}
+
+if (defined $optimize && !$found_cc_opt) {
+    push @opts, "--with-cc-opt=$optimize";
+}
 
 my $root = `pwd`;
 chomp $root;
