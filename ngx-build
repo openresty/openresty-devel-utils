@@ -69,7 +69,7 @@ for my $opt (@opts) {
                 $found_cc_opt = 1;
 
             } else {
-                $opt .= " $opt";
+                $opt .= " $optimize";
             }
 
             $found_cc_opt = 1;
