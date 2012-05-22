@@ -83,5 +83,6 @@ $s =~ s/^\*\* (\S)/\t* $1/gms;
 $s =~ s/^\*\*\* (\S)/\t\t* $1/gms;
 $s =~ s/\&#91;/[/g;
 
+print "<!---\nThis file was generated automatically from $infile by wiki2markdown.pl\n-->\n\n";
 print $s;
 
