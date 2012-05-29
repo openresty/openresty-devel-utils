@@ -53,6 +53,7 @@ if (($1 == 1 && $2 == 1 && $3 >= 4)
 my $cc = $ENV{NGX_BUILD_CC};
 my $optimize = $ENV{NGX_BUILD_OPT};
 my $jobs = $ENV{NGX_BUILD_JOBS} || 1;
+my $disable_no_pool = $ENV{NGX_BUILD_DISABLE_NO_POOL};
 
 push @opts, '--with-poll_module';
 
@@ -171,8 +172,10 @@ sub apply_patches {
     warn "applying the upsteram_pipelining patch...\n";
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-upstream_pipelining.patch");
 
-    warn "applying no-pool patch...\n";
-    shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
+    unless ($disable_no_pool) {
+        warn "applying no-pool patch...\n";
+        shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
+    }
 
     warn "applying no-error-page patch...\n";
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-no_error_pages.patch");
