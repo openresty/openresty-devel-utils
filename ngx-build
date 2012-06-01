@@ -193,6 +193,8 @@ sub apply_patches {
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-add_core_vars_polluting_globals.patch");
 
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-resolver_debug_log_overflow.patch");
+
     unless ($ver ge '001001006') {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-named_location_clear_mods_ctx.patch");
     }
