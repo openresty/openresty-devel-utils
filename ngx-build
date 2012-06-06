@@ -6,6 +6,12 @@ use warnings;
 use File::Spec;
 use Getopt::Std;
 
+my $cc = $ENV{NGX_BUILD_CC};
+my $optimize = $ENV{NGX_BUILD_OPT};
+my $jobs = $ENV{NGX_BUILD_JOBS} || 1;
+my $disable_no_pool = $ENV{NGX_BUILD_DISABLE_NO_POOL};
+my $no_debug = $ENV{NGX_BUILD_NO_DEBUG};
+
 my %opts;
 getopts("fp:", \%opts) or usage();
 
@@ -50,16 +56,15 @@ if (($1 == 1 && $2 == 1 && $3 >= 4)
     @opts = @ARGV;
 }
 
-my $cc = $ENV{NGX_BUILD_CC};
-my $optimize = $ENV{NGX_BUILD_OPT};
-my $jobs = $ENV{NGX_BUILD_JOBS} || 1;
-my $disable_no_pool = $ENV{NGX_BUILD_DISABLE_NO_POOL};
-
 push @opts, '--with-poll_module';
 
 my $found_cc_opt;
 my @new_opts;
 for my $opt (@opts) {
+    if ($no_debug && $opt eq '--with-debug') {
+        next;
+    }
+
     if (defined $cc) {
         if ($opt =~ /^--with-cc=/) {
             next;
