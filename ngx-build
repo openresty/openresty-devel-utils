@@ -185,16 +185,20 @@ sub apply_patches {
     warn "applying no-error-page patch...\n";
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-no_error_pages.patch");
 
-    warn "applying the max_subrequests patch...\n";
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-max_subrequests.patch");
+    unless ($ver ge '001001016') {
+        warn "applying the max_subrequests patch... ($ver)\n";
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-max_subrequests.patch");
+    }
 
     unless ($ver ge '001001011' or ($ver ge '001000012' and $ver le '001001000')) {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-variable_header_ignore_no_hash.patch");
     }
 
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-reset_wev_handler_in_named_locations.patch");
+    unless ($ver ge '001002001') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-reset_wev_handler_in_named_locations.patch");
 
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-filter_finalize_hang.patch");
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-filter_finalize_hang.patch");
+    }
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-add_core_vars_polluting_globals.patch");
 
