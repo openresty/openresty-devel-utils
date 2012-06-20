@@ -1,0 +1,17 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+$ENV{PATH} = "./work/nginx/sbin:$ENV{PATH}";
+while (<>) {
+    s{^nginx(\(\S*\)) \[(0x[0-9a-f]+)\]$}{
+        my $prefix = $1;
+        my $s = `addr2line -e \`which nginx\` $2`;
+        $s =~ s!.*/src\b!/src!;
+        $s =~ s! line (\d+)!:$1!;
+        $s =~ s/\s+//gs; "  $prefix [$s]"
+    }e;
+    print;
+}
+
