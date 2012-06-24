@@ -206,6 +206,8 @@ sub apply_patches {
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-poll_del_event_at_exit.patch");
 
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-location_if_inherits_proxy.patch");
+
     unless ($ver ge '001001006') {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-named_location_clear_mods_ctx.patch");
     }
