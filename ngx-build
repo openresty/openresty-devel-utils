@@ -11,6 +11,7 @@ my $optimize = $ENV{NGX_BUILD_OPT};
 my $jobs = $ENV{NGX_BUILD_JOBS} || 1;
 my $disable_no_pool = $ENV{NGX_BUILD_DISABLE_NO_POOL};
 my $no_debug = $ENV{NGX_BUILD_NO_DEBUG};
+my $dtrace = $ENV{NGX_BUILD_DTRACE};
 
 my %opts;
 getopts("fp:", \%opts) or usage();
@@ -57,6 +58,10 @@ if (($1 == 1 && $2 == 1 && $3 >= 4)
 }
 
 push @opts, '--with-poll_module';
+
+if ($dtrace) {
+    push @opts, '--with-dtrace-probes';
+}
 
 my $found_cc_opt;
 my @new_opts;
@@ -221,6 +226,12 @@ sub apply_patches {
 
     unless ($ver ge '001000009') {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-log_escape_non_ascii.patch");
+    }
+
+    if ($dtrace) {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-dtrace.patch");
+        chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001000008') {
