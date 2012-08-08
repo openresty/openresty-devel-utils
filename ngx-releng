@@ -27,7 +27,7 @@ perl -e 'use strict; use warnings;
         open my $in, $fname or die $!;
         while (<$in>) {
             next if /^\s*$/ || m{^\s*/\*};
-            if (/ngx_p[cn]*alloc\b|\b[mc]alloc\b/) {
+            if (/ngx_p[cn]*alloc\b|\b[mc]alloc\b|\bngx_array_push\b|\bngx_array_create\b|\bngx_alloc_chain_link\b|\bngx_c?alloc_buf\b/) {
                 my $pattern = $&;
                 if (!/return\b.*?$pattern/ && !/"[^"]*$pattern/ && !/^\s+\*/) {
                     if (/^\s+/) {
