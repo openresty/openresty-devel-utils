@@ -1,0 +1,126 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Getopt::Std;
+
+my %opts;
+getopts("o:", \%opts);
+
+my $outfile = $opts{o} || "/dev/stdout";
+
+my $infile = shift;
+if (!$infile) {
+    die "No input dtrace provider file specified\n";
+}
+
+open my $in, $infile or
+    die "Cannot open $infile for reading: $!\n";
+
+my $src = do { local $/; <$in> };
+
+close $in;
+
+my ($provider, $modname);
+if ($src =~ /\bprovider \s+ (nginx_(\w+))/xs) {
+    $provider = $1;
+    $modname = $2;
+
+} else {
+    die "failed to extrace provider name from $infile\n";
+}
+
+my $modname_uc = uc($modname);
+my $buf = <<_EOC_;
+/*
+ * automatically generated from the file $infile by the
+ *  gen-dtrace-probe-header tool in the nginx-devel-utils project:
+ *  https://github.com/agentzh/nginx-devel-utils
+ */
+
+#ifndef NGX_HTTP_${modname_uc}_PROBE_H
+#define NGX_HTTP_${modname_uc}_PROBE_H
+
+
+#include <ngx_config.h>
+#include <ngx_core.h>
+#include <ngx_http.h>
+
+
+#if defined(NGX_DTRACE) && NGX_DTRACE
+
+#include <ngx_dtrace_provider.h>
+
+_EOC_
+
+my @defs;
+
+while ($src =~ /^ \s* probe \s+ (\w+) \s* \( ([^\)]*) \) \s* ; \s* $/xogms) {
+    my ($probe, $args) = ($1, $2);
+    $args =~ s/\n/ /g;
+    $args =~ s/  +/ /g;
+    my @args = split /\s*,\s*/, $args;
+    my @arg_names;
+    for my $arg (@args) {
+        if ($arg =~ /\w+$/) {
+            push @arg_names, $&;
+
+        } else {
+            die "failed to extract argument name from the argument specifier $arg in probe $probe\n";
+        }
+    }
+
+    my $dtrace_macro = $provider . "_" . $probe;
+    for ($dtrace_macro) {
+        s/__+/_/g;
+        $_ = uc;
+    }
+
+    my $nginx_macro = $probe;
+    for ($nginx_macro) {
+        s/__+/_/g;
+        s/^http_${modname}_//;
+    }
+
+    $nginx_macro = "ngx_http_${modname}_probe_$nginx_macro";
+
+    #warn "probe: $probe (dtrace $dtrace_macro, nginx $nginx_macro), args: @arg_names\n";
+
+    push @defs, {
+        dtrace_macro => $dtrace_macro,
+        nginx_macro => $nginx_macro,
+        args => \@arg_names,
+    };
+}
+
+for my $def (@defs) {
+    my $nginx_macro = $def->{nginx_macro};
+    my $dtrace_macro = $def->{dtrace_macro};
+    my @args = @{ $def->{args} };
+    my $arglist = join ", ", @args;
+
+    my $s = "#define $nginx_macro($arglist)";
+    $s .= (" " x (77 - length $s)) . "\\\n";
+    $s .= "    $dtrace_macro($arglist)\n\n";
+    $buf .= $s;
+}
+
+$buf .= "#else /* !(NGX_DTRACE) */\n\n";
+
+for my $def (@defs) {
+    my $nginx_macro = $def->{nginx_macro};
+    my $dtrace_macro = $def->{dtrace_macro};
+    my @args = @{ $def->{args} };
+    my $arglist = join ", ", @args;
+
+    $buf .= "#define $nginx_macro($arglist)\n";
+}
+
+$buf .= "\n#endif\n\n#endif /* NGX_HTTP_${modname_uc}_PROBE_H */\n";
+
+open my $out, ">$outfile"
+    or die "Cannot open $outfile for writing: $!\n";
+print $out $buf;
+close $out;
+
