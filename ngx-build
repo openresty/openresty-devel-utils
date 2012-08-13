@@ -205,11 +205,13 @@ sub apply_patches {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-filter_finalize_hang.patch");
     }
 
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-add_core_vars_polluting_globals.patch");
+    unless ($ver ge '001003004') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-add_core_vars_polluting_globals.patch");
 
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-resolver_debug_log_overflow.patch");
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-resolver_debug_log_overflow.patch");
 
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-poll_del_event_at_exit.patch");
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-poll_del_event_at_exit.patch");
+    }
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-location_if_inherits_proxy.patch");
 
