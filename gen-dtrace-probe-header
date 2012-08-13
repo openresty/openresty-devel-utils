@@ -60,6 +60,7 @@ while ($src =~ /^ \s* probe \s+ (\w+) \s* \( ([^\)]*) \) \s* ; \s* $/xogms) {
     my ($probe, $args) = ($1, $2);
     $args =~ s/\n/ /g;
     $args =~ s/  +/ /g;
+    $args =~ s{/\* .*? \*/}{}xg;
     my @args = split /\s*,\s*/, $args;
     my @arg_names;
     for my $arg (@args) {
