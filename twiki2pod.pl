@@ -27,6 +27,20 @@ while (<>) {
         }
 
         print "\n\n=item *\n\n";
+
+    } else {
+        $new_level = 0;
+
+        if ($new_level == $level) {
+            # do nothing
+
+        } else {
+            # $new_level < $level
+            while ($new_level < $level) {
+                print "\n\n=back\n\n";
+                $level--;
+            }
+        }
     }
 
     s/\[\[([^]]+)\|[^]]+\]\]/$1/g;
