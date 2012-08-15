@@ -205,7 +205,7 @@ sub apply_patches {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-filter_finalize_hang.patch");
     }
 
-    unless ($ver ge '001003004') {
+    unless ($ver ge '001002003') {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-add_core_vars_polluting_globals.patch");
 
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-resolver_debug_log_overflow.patch");
