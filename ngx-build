@@ -230,6 +230,8 @@ sub apply_patches {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-log_escape_non_ascii.patch");
     }
 
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-nonbuffered-upstream-truncation.patch");
+
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-dtrace.patch");
     chdir ".." or die "cannot switch to ..\n";
