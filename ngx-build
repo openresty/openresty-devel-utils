@@ -255,6 +255,8 @@ sub apply_patches {
     shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-dtrace.patch");
     chdir ".." or die "cannot switch to ..\n";
 
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-channel-uninit-params.patch");
+
     unless ($ver ge '001000008') {
         warn "applying request-body-preread patch...\n";
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
