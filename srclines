@@ -22,9 +22,10 @@ for my $file (@ARGV) {
         $src =~ s/^\s+--.*//gm;
         $src =~ s/^\s*\n//gm;
 
-    } elsif ($ext eq 'h' or $ext eq 'c') {
+    } elsif ($ext eq 'h' || $ext eq 'c' || $ext eq 'cc' || $ext eq 'cpp') {
         $src =~ s{^\#[ \t]*if[ \t]+(?:0|\(?NGX_DEBUG\)?)[ \t]*\n.*?\n\#endif\b.*?\n}{}gms;
         $src =~ s{/\*.*?\*/}{}gs;
+        $src =~ s{//[^\n]*}{}gs;
         $src =~ s{^\s*dd\(".*\n}{}gm;
         $src =~ s/^\s*\n//gm;
 
