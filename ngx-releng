@@ -11,15 +11,15 @@ ack '(?<=This document describes ).*-nginx-module v\d+(\.\d\S*)' README
 
 echo =======================================
 
-ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src && exit 1
-ack '.{81}' src/ngx_*.[ch]
-ack '(?<!:)//' src/ngx_*.[ch]
-ack '[ \t]+$' src/ngx_*.[ch]
-ack '^master_on' t && exit 1
-ack '\b(?:ONLY|LAST)\b' t
-ack -l '\r\n' t
-ack '\(\);' src/ngx_*.h
-ack '^static .*?\(\);' src/ngx_*.[ch]
+ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null && exit 1
+ack '.{81}' src/ngx_*.[ch] /dev/null
+ack '(?<!:)//' src/ngx_*.[ch] /dev/null
+ack '[ \t]+$' src/ngx_*.[ch] /dev/null
+ack '^master_on' t /dev/null && exit 1
+ack '\b(?:ONLY|LAST)\b' t /dev/null
+ack -l '\r\n' t /dev/null
+ack '\(\);' src/ngx_*.h /dev/null
+ack '^static .*?\(\);' src/ngx_*.[ch] /dev/null
 perl -e 'use strict; use warnings;
     my $seen = 0;
     my $saved;
@@ -56,7 +56,7 @@ perl -e 'use strict; use warnings;
         close $in;
     }' src/ngx_*.[ch]
 
-ack '_log_error\(NGX_[^L]' src/ngx_*.[ch]
+ack '_log_error\(NGX_[^L]' src/ngx_*.[ch] /dev/null
 
 echo done.
 
