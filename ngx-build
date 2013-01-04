@@ -257,6 +257,12 @@ sub apply_patches {
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-channel-uninit-params.patch");
 
+    unless ($ver ge '001002006') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-upstream_test_connect_kqueue.patch");
+    }
+
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-slab_alloc_no_memory_as_info.patch");
+
     unless ($ver ge '001000008') {
         warn "applying request-body-preread patch...\n";
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-request_body_preread_fix.patch");
