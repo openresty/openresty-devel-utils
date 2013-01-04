@@ -49,7 +49,16 @@ while (my $entry = readdir $dir) {
         warn "overriding existing symlink $target\n";
     }
     #warn "creating $target --> $root/$entry\n";
-    system("ln -svf `pwd`/$source $target") == 0 or
+
+    my $ln;
+    if ($^O eq 'solaris') {
+        $ln = "ln -sf";
+
+    } else {
+        $ln = "ln -svf";
+    }
+
+    system("$ln `pwd`/$source $target") == 0 or
         die "Failed to create the symlink\n";;
 
     push @links, $target;
