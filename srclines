@@ -22,11 +22,16 @@ for my $file (@ARGV) {
         $src =~ s/^\s+--.*//gm;
         $src =~ s/^\s*\n//gm;
 
-    } elsif ($ext =~ /^(?:[ch]|cc|cpp|y)$/) {
-        $src =~ s{^\#[ \t]*if[ \t]+(?:0|\(?NGX_DEBUG\)?)[ \t]*\n.*?\n\#endif\b.*?\n}{}gms;
+    } elsif ($ext =~ /^(?:[ch]|cc|cpp|y|dasc)$/) {
+        $src =~ s{^\#[ \t]*if[ \t]+(?:0|\(?(?:DDEBUG|NGX_DEBUG)\)?)[ \t]*\n.*?\n\#endif\b.*?\n}{}gms;
         $src =~ s{/\*.*?\*/}{}gs;
         $src =~ s{//[^\n]*}{}gs;
         $src =~ s{^\s*dd\(".*\n}{}gm;
+
+        if ($ext eq 'dasc') {
+            $src =~ s/^[ \t]*\|[ \t]*$//mgs;
+        }
+
         $src =~ s/^\s*\n//gm;
 
     } else {
