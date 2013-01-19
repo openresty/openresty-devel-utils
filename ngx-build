@@ -170,8 +170,13 @@ if (-f "$target/logs/nginx.pid") {
         warn "failed to quit existing nginx.\n";
 }
 
-shell("make -j$jobs");
-shell("make install");
+my $make = 'make';
+if ($^O eq 'solaris') {
+    $make = 'gmake';
+}
+
+shell("$make -j$jobs");
+shell("$make install");
 
 sub configure_nginx {
     system("./configure", "--prefix=$target",
