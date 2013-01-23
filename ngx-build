@@ -279,6 +279,8 @@ sub apply_patches {
         shell("patch -p1 -l < $root/../ngx_openresty/patches/nginx-$version-request_body_in_single_buf.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-resolver_wev_handler_segfault_with_poll.patch");
 }
 
 sub usage {
