@@ -39,8 +39,8 @@ my $buf = <<_EOC_;
  *  https://github.com/agentzh/nginx-devel-utils
  */
 
-#ifndef NGX_HTTP_${modname_uc}_PROBE_H
-#define NGX_HTTP_${modname_uc}_PROBE_H
+#ifndef _NGX_HTTP_${modname_uc}_PROBE_H_INCLUDED_
+#define _NGX_HTTP_${modname_uc}_PROBE_H_INCLUDED_
 
 
 #include <ngx_config.h>
@@ -118,7 +118,7 @@ for my $def (@defs) {
     $buf .= "#define $nginx_macro($arglist)\n";
 }
 
-$buf .= "\n#endif\n\n#endif /* NGX_HTTP_${modname_uc}_PROBE_H */\n";
+$buf .= "\n#endif\n\n#endif /* _NGX_HTTP_${modname_uc}_PROBE_H_INCLUDED_ */\n";
 
 open my $out, ">$outfile"
     or die "Cannot open $outfile for writing: $!\n";
