@@ -289,6 +289,9 @@ sub apply_patches {
     unless ($ver ge '001002007') {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-resolver_wev_handler_segfault_with_poll.patch");
     }
+
+    warn "applying the run_posted_requests_in_resolver patch...\n";
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-run_posted_requests_in_resolver.patch");
 }
 
 sub usage {
