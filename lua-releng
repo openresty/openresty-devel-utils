@@ -15,7 +15,7 @@ for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua 
     my $found_ver;
     while (<$in>) {
         my ($ver, $skipping);
-        if (/(?x) _VERSION \s* = .*? ([\d\.]*\d+) (.*? SKIP)?/) {
+        if (/(?x) (?:_VERSION|version) \s* = .*? ([\d\.]*\d+) (.*? SKIP)?/) {
             my $orig_ver = $ver = $1;
             $found_ver = 1;
             $skipping = $2;
@@ -32,10 +32,11 @@ for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua 
         }
     }
     if (!$found_ver) {
-        warn "WARNING: No _VERSION field found in `$file`.\n";
+        warn "WARNING: No \"_VERSION\" or \"version\" field found in `$file`.\n";
     }
     close $in;
 
+    system("luac -p -l $file | grep ETGLOBAL | grep -vE 'require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math'");
     file_contains($file, "attempt to write to undeclared variable");
 }
 
