@@ -8,8 +8,8 @@ use File::Slurp qw(read_file);
 sub file_contains ($$);
 
 my $version;
-for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua }) {
-    # Check the sanity of each .pm file
+for my $file (map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua }) {
+    # Check the sanity of each .lua file
     open my $in, $file or
         die "ERROR: Can't open $file for reading: $!\n";
     my $found_ver;
@@ -21,6 +21,11 @@ for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua 
             $skipping = $2;
             $ver =~ s{^(\d+)\.(\d{3})(\d{3})$}{join '.', int($1), int($2), int($3)}e;
             warn "$file: $orig_ver ($ver)\n";
+
+        } elsif (/(?x) (?:_VERSION|version) \s* = \s* ([a-zA-Z_]\S*)/) {
+            warn "$file: $1\n";
+            $found_ver = 1;
+            last;
         }
 
         if ($ver and $version and !$skipping) {
@@ -36,8 +41,8 @@ for my $file (map glob, qw{ lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua 
     }
     close $in;
 
-    system("luac -p -l $file | grep ETGLOBAL | grep -vE 'require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math'");
-    file_contains($file, "attempt to write to undeclared variable");
+    system("luac -p -l $file | grep ETGLOBAL | grep -vE 'require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math|pcall|xpcall|unpack'");
+    #file_contains($file, "attempt to write to undeclared variable");
 }
 
 sub file_contains ($$) {
