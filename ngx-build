@@ -301,6 +301,9 @@ sub apply_patches {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-cve-2013-2070.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    warn "applying the invalid_referer_hash patch...\n";
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-invalid_referer_hash.patch");
 }
 
 sub usage {
