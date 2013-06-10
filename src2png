@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo No input file specified. > /dev/stderr
+    exit 1
+fi
+
+gvim -e $1 -c "set nobackup" -c ":colorscheme moria" -c :TOhtml -c wq -c :q || exit 1
+exec CutyCapt --url=$1.html --out=$1.png --zoom-factor=2
+
