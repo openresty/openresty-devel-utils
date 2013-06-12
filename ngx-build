@@ -305,8 +305,9 @@ sub apply_patches {
     #warn "applying the invalid_referer_hash patch...\n";
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-invalid_referer_hash.patch");
 
-    #warn "applying the invalid_referer_hash patch...\n";
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-gcc-maybe-uninitialized-warning.patch");
+    if ($ver ge '001004001') {
+        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-gcc-maybe-uninitialized-warning.patch");
+    }
 }
 
 sub usage {
