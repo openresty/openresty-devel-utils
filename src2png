@@ -5,6 +5,26 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-gvim -e $1 -c "set nobackup" -c ":colorscheme moria" -c :TOhtml -c wq -c :q || exit 1
-exec CutyCapt --url=$1.html --out=$1.png --zoom-factor=2
+rm -f $1.html
+gvim -e $1 -c "set nobackup" \
+    -c ":colorscheme desert" \
+    -c :TOhtml \
+    -c wq -c :q \
+    || exit 1
+
+while [ ! -f $1.html ]; do
+    echo sleeping...
+    sleep 0.2
+done
+
+sed 's/background-color: *[^;]*/background-color: #000/g' $1.html > $1.tmp
+
+sed 's/ color: #000000;/ color: #eee;/g' $1.tmp > $1.html
+#sed 's/  /\&nbsp;\&nbsp;/g' $1.html > $1.tmp
+#sed 's/  /\&nbsp;\&nbsp;/g' $1.tmp > $1.html
+
+#echo "sed: $? $1.html"
+
+CutyCapt --url=$1.html --out=$1.png --zoom-factor=2 || exit 1
+convert -trim +repage -bordercolor black -border 15x15 $1.png $1.png
 
