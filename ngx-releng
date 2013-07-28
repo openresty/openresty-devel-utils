@@ -20,6 +20,7 @@ ack '\--- *(?:ONLY|LAST)' t /dev/null
 ack -l '\r\n' t /dev/null
 ack '\(\);' src/ngx_*.h /dev/null
 ack '^static .*?\(\);' src/ngx_*.[ch] /dev/null
+ack '^[a-zA-Z]\w+\(\)$' src/ngx_*.[ch] /dev/null
 perl -e 'use strict; use warnings;
     my $seen = 0;
     my $saved;
