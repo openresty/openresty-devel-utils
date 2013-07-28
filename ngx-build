@@ -14,6 +14,7 @@ my $disable_no_pool = $ENV{NGX_BUILD_DISABLE_NO_POOL};
 my $no_debug = $ENV{NGX_BUILD_NO_DEBUG};
 my $dtrace = $ENV{NGX_BUILD_DTRACE};
 my $cc_opts = $ENV{NGX_BUILD_CC_OPTS};
+my $ld_opts = $ENV{NGX_BUILD_LD_OPTS};
 
 my %opts;
 getopts("fp:", \%opts) or usage();
@@ -102,6 +103,12 @@ for my $opt (@opts) {
         }
     }
 
+    if (defined $ld_opts) {
+        if ($opt =~ s/^--with-ld-opt=/$&$ld_opts /) {
+            undef $ld_opts;
+        }
+    }
+
     push @new_opts, $opt;
 }
 
@@ -125,6 +132,11 @@ if (defined $optimize && !$found_cc_opt) {
 if (defined $cc_opts) {
     push @opts, "--with-cc-opt=$cc_opts";
     undef $cc_opts;
+}
+
+if (defined $ld_opts) {
+    push @opts, "--with-ld-opt=$ld_opts";
+    undef $ld_opts;
 }
 
 my $root = `pwd`;
