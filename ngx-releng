@@ -21,6 +21,59 @@ ack -l '\r\n' t /dev/null
 ack '\(\);' src/ngx_*.h /dev/null
 ack '^static .*?\(\);' src/ngx_*.[ch] /dev/null
 ack '^[a-zA-Z]\w+\(\)$' src/ngx_*.[ch] /dev/null
+
+perl -e 'use strict; use warnings;
+    for my $fname (@ARGV) {
+        my $func;
+        open my $in, $fname or die $!;
+        while (<$in>) {
+            next if /^\s*$/ || m{^\s*/\*};
+            if (/^[a-z]\w+\(\S+.*?\) \{$/) {
+                print "$fname:$.: \e[33m$_\e[0m";
+                undef $func;
+                next;
+            }
+
+            if (/^[a-z]\w+\(.*?,$/) {
+                $func = 1;
+                next;
+            }
+
+            if ($func && /^ {4}[a-z]\S+.*?,$/) {
+                next;
+            }
+
+            if ($func && /^ {4}[a-z]\S+.*? \{$/) {
+                print "$fname:$.: \e[33m$_\e[0m";
+                undef $func;
+                next;
+            }
+
+            undef $func;
+        }
+        close $in;
+    }' src/ngx_*.[ch]
+
+perl -e 'use strict; use warnings;
+    for my $fname (@ARGV) {
+        my $seen;
+        open my $in, $fname or die $!;
+        while (<$in>) {
+            next if /^\s*$/ || m{^\s*/\*};
+            if (/^ {5,}\S+.*?\)$/) {
+                $seen = $_;
+                next;
+            }
+            if ($seen && /^\{$/) {
+                print "$fname:$.: \e[33m$seen\e[0m";
+                undef $seen;
+                next;
+            }
+            undef $seen;
+        }
+        close $in;
+    }' src/ngx_*.[ch]
+
 perl -e 'use strict; use warnings;
     my $seen = 0;
     my $saved;
