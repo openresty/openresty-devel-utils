@@ -65,7 +65,8 @@ perl -e 'use strict; use warnings;
                 next;
             }
             if ($seen && /^\{$/) {
-                print "$fname:$.: \e[33m$seen\e[0m";
+                my $ln = $. - 1;
+                print "$fname:$ln: \e[33m$seen\e[0m";
                 undef $seen;
                 next;
             }
