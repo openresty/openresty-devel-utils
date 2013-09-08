@@ -107,7 +107,7 @@ while (<>) {
             }
         }
         $last_bl_count_level = $level;
-        print "\n=item *\n\n";
+        print "\n\n=item *\n\n";
         print "$txt\n";
     } elsif (/^: (.*)/) {
         my $txt = $1;
