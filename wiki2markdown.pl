@@ -44,13 +44,14 @@ $s =~ s{^<code>([^\n]*?)</code>}{`$1`}gms;
 while ($s =~ s{^(\S[^\n]*?)<code>([^\n]*?)</code>}{$1`$2`}gms) {}
 $s =~ s! \[\[ (\# [^\|\]\[\n]*) \| ( [^\]\n]+ ) \]\]!
     my ($link, $tag) = ($1, $2);
-    $link =~ s/ /_/g;
-    $link =~ s/[\$\(\)]/sprintf(".%02x", ord($&))/ge;
-    if ($name) {
-        "[$tag](http://wiki.nginx.org/$name$link)"
-    } else {
-        "`$tag`"
+    $link =~ s/[^-\w_ ]//g;
+    $link =~ s/ /-/g;
+    $link = lc($link);
+    if ($link eq 'name') {
+        $link = "readme";
     }
+    #$link =~ s/[\$\(\)]/sprintf(".%02x", ord($&))/ge;
+    "[$tag](#$link)"
     !gmsxe;
 $s =~ s{ \[ (https?://[^\|\]\[\s]*) \s+ ( [^\]]+ ) \]}
     {[$2]($1)}gmsx;
