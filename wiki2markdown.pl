@@ -29,6 +29,7 @@ my %github_mods = (
     HttpLuaModule => 'chaoslawful/lua-nginx-module',
     HttpMemcModule => 'agentzh/memc-nginx-module',
     HttpRedis2Module => 'agentzh/redis2-nginx-module',
+    HttpChunkinModule => 'agentzh/chunkin-nginx-module',
     HttpArrayVarModule => 'agentzh/array-var-nginx-module',
     HttpSRCacheModule => 'agentzh/srcache-nginx-module',
     HttpEncryptedSessionModule => 'agentzh/encrypted-session-nginx-module',
@@ -54,6 +55,8 @@ my %official_mods = (
     HttpFcgiModule => 'http/ngx_http_fastcgi_module',
     HttpMapModule => 'http/ngx_http_map_module',
     HttpGzipModule => 'http/ngx_http_gzip_module',
+    HttpSsiModule => 'http/ngx_http_ssi_module',
+    HttpAdditionModule => 'http/ngx_http_addition_module',
 );
 
 sub gen_anchor {
@@ -86,6 +89,24 @@ sub gen_link {
     }
     return undef;
 }
+
+sub gen_toc ($) {
+    my $s = shift;
+    my $toc = '';
+    open my $in, "<", \$s or die $!;
+    while (<$in>) {
+        if (/^(=+)\s+(\S[^\n]*?)\s+\1$/) {
+            my ($prefix, $title) = ($1, $2);
+            my $anchor = gen_anchor($title);
+            my $level = length($prefix) - 1;
+            $toc .= ("    " x $level) . "* [$title](#$anchor)\n";
+        }
+    }
+    return $toc;
+}
+
+my $toc = gen_toc($s);
+#warn $toc;
 
 #warn sprintf "%02x (%s)", ord(substr($s, 0, 1)), substr($s, 0, 1);
 #warn sprintf "%02x (%s)", ord(substr($s, 1, 1)), substr($s, 1, 1);
@@ -160,6 +181,14 @@ $s =~ s/^: (\S)/\t$1/gms;
 $s =~ s/^\*\* (\S)/\t* $1/gms;
 $s =~ s/^\*\*\* (\S)/\t\t* $1/gms;
 $s =~ s/\&#91;/[/g;
+
+if (!($s =~ s/^(Name\n=+\n)(.*?)(^[^\n]+\n=+\n)/$1$2Table of Contents\n=================\n\n$toc\n$3/sm)) {
+    warn "WARNING: Failed to insert TOC.\n";
+
+} else {
+    my $i = 0;
+    $s =~ s{^[^\n]+\n[=-]+\n}{ ++$i > 5 ? "[Back to TOC](#table-of-contents)\n\n$&" : $&}gesm;
+}
 
 print "<!---\nDon't edit this file manually! Instead you should generate it ",
     "by using:\n    wiki2markdown.pl $infile\n-->\n\n";
