@@ -182,7 +182,7 @@ $s =~ s/^\*\* (\S)/\t* $1/gms;
 $s =~ s/^\*\*\* (\S)/\t\t* $1/gms;
 $s =~ s/\&#91;/[/g;
 
-if (!($s =~ s/^(Name\n=+\n)(.*?)(^[^\n]+\n=+\n)/$1$2Table of Contents\n=================\n\n$toc\n$3/sm)) {
+if (!($s =~ s/^(Name\n=+\n)(.*?)(^[^\n]+\n=+\n)/$1$2Table of Contents\n=================\n\n$toc\n$3/smi)) {
     warn "WARNING: Failed to insert TOC.\n";
 
 } else {
