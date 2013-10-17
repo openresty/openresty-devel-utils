@@ -23,6 +23,70 @@ my $s = do { local $/; <$in> };
 
 close $in;
 
+my %github_mods = (
+    HttpSetMiscModule => 'agentzh/set-misc-nginx-module',
+    HttpEchoModule => 'agentzh/echo-nginx-module',
+    HttpLuaModule => 'chaoslawful/lua-nginx-module',
+    HttpMemcModule => 'agentzh/memc-nginx-module',
+    HttpRedis2Module => 'agentzh/redis2-nginx-module',
+    HttpArrayVarModule => 'agentzh/array-var-nginx-module',
+    HttpSRCacheModule => 'agentzh/srcache-nginx-module',
+    HttpEncryptedSessionModule => 'agentzh/encrypted-session-nginx-module',
+    HttpHeadersMoreModule => 'agentzh/headers-more-nginx-module',
+    HttpDrizzleModule => 'chaoslawful/drizzle-nginx-module',
+    HttpRdsJsonModule => 'agentzh/rds-json-nginx-module',
+    HttpRdsCsvModule => 'agentzh/rds-csv-nginx-module',
+    LuaRdsParser => 'agentzh/lua-rds-parser',
+    LuaRedisParser => 'agentzh/lua-redis-parser',
+);
+
+my %official_mods = (
+    HttpProxyModule => 'http/ngx_http_proxy_module',
+    HttpFastcgiModule => 'http/ngx_http_fastcgi_module',
+    HttpCoreModule => 'http/ngx_http_core_module',
+    HttpUpstreamModule => 'http/ngx_http_upstream_module',
+    HttpRewriteModule => 'http/ngx_http_rewrite_module',
+    HttpMemcachedModule => 'http/ngx_http_memcached_module',
+    HttpHeadersModule => 'http/ngx_http_headers_module',
+    HttpLogModule => 'http/ngx_http_log_module',
+    HttpAccessModule => 'http/ngx_http_access_module',
+    EventsModule => 'ngx_core_module',
+    HttpFcgiModule => 'http/ngx_http_fastcgi_module',
+    HttpMapModule => 'http/ngx_http_map_module',
+    HttpGzipModule => 'http/ngx_http_gzip_module',
+);
+
+sub gen_anchor {
+    my $link = shift;
+    $link =~ s/[^-\w_ ]//g;
+    $link =~ s/ /-/g;
+    lc($link);
+}
+
+sub gen_link {
+    my $link = shift;
+    if ($link =~ /(Http|Events|Lua)[A-Z]\w+/) {
+        my $type = $1;
+        my $mod = $&;
+        if (my $name = $github_mods{$mod}) {
+            $link =~ s/\#(.+)/'#' . gen_anchor($1)/e;
+            $link =~ s{\Q$mod\E}{http://github.com/$name};
+            $name =~ s{^\w+/}{}g;
+            return $link, $name;
+        }
+
+        if (my $name = $official_mods{$mod}) {
+            if ($link =~ s/\$/var_/) {
+                $link =~ s/_[A-Z]+$/_/;
+            }
+            $link =~ s{\Q$mod\E}{http://nginx.org/en/docs/$name.html};
+            $name =~ s{^\w+/}{}g;
+            return $link, $name;
+        }
+    }
+    return undef;
+}
+
 #warn sprintf "%02x (%s)", ord(substr($s, 0, 1)), substr($s, 0, 1);
 #warn sprintf "%02x (%s)", ord(substr($s, 1, 1)), substr($s, 1, 1);
 #warn sprintf "%02x (%s)", ord(substr($s, 2, 1)), substr($s, 2, 1);
@@ -44,9 +108,7 @@ $s =~ s{^<code>([^\n]*?)</code>}{`$1`}gms;
 while ($s =~ s{^(\S[^\n]*?)<code>([^\n]*?)</code>}{$1`$2`}gms) {}
 $s =~ s! \[\[ (\# [^\|\]\[\n]*) \| ( [^\]\n]+ ) \]\]!
     my ($link, $tag) = ($1, $2);
-    $link =~ s/[^-\w_ ]//g;
-    $link =~ s/ /-/g;
-    $link = lc($link);
+    $link = gen_anchor($link);
     if ($link eq 'name') {
         $link = "readme";
     }
@@ -59,24 +121,39 @@ $s =~ s{ \[ (https?://[^\|\]\[\s]*) \s+ ( [^\]]+ ) \]}
 $s =~ s! \[\[ ([^\|\]\[]*) \| ( [^\]]+ ) \]\]
     !
         my ($tag, $link) = ($2, $1);
-        $link =~ s/ /_/g;
-        $link =~ s/[\$\(\)]/sprintf(".%02x", ord($&))/ge;
-        #warn "link $link $name";
-        if ($link =~ /^\#/) {
-            if ($name) {
-                "[$tag](http://wiki.nginx.org/$name$link)"
-            } else {
-                "`$tag`"
-            }
+        my ($newlink, $modname) = gen_link($link);
+        if (defined $newlink) {
+            #warn "$tag $newlink";
+            "[$tag]($newlink)";
 
         } else {
-            "[$tag](http://wiki.nginx.org/$link)"
+            warn "$tag $link";
+            $link =~ s/ /_/g;
+            $link =~ s/[\$\(\)]/sprintf(".%02x", ord($&))/ge;
+            #warn "link $link $name";
+            if ($link =~ /^\#/) {
+                if ($name) {
+                    "[$tag](http://wiki.nginx.org/$name$link)"
+                } else {
+                    "`$tag`"
+                }
+
+            } else {
+                "[$tag](http://wiki.nginx.org/$link)"
+            }
         }
     !gmsxe;
 
 while ($s =~ s{^(\S[^\n]*?)?([^\(\<\n])(https?://[^\s)(\n]+)}{$1$2<$3>}gms) {}
-$s =~ s{^\[\[(\w+)\]\]}{\[$1](http://wiki.nginx.org/$1)}gsm;
-while ($s =~ s{^(\S[^\n]*?)\[\[(\w+)\]\]}{$1\[$2](http://wiki.nginx.org/$2)}smg) {}
+#$s =~ s{^\[\[(\w+)\]\]}{my $name = $1; my $link = gen_link($name); warn "!!! $name"; defined($link) ? "[$name]($link)" : "[$name](http://wiki.nginx.org/$name)"}gsme;
+while ($s =~ s{^(\S[^\n]*?)\[\[(\w+)\]\]}{
+    my ($prefix, $name) = ($1, $2);
+    my ($link, $modname) = gen_link($name);
+    if (!defined $link) {
+        warn "$name";
+    }
+    defined($link) ? "$prefix\[$modname]($link)" : "$prefix\[$name](http://wiki.nginx.org/$name)"
+}smge) {}
 $s =~ s{^(https?://[^\s)(\n]+)}{<$1>}gms;
 $s =~ s/^\# (\S)/1. $1/gms;
 $s =~ s/^: (\S)/\t$1/gms;
