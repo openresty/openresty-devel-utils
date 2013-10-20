@@ -16,6 +16,7 @@ ack '.{81}' src/ngx_*.[ch] /dev/null
 ack '(?<!:)//' src/ngx_*.[ch] /dev/null
 ack '[ \t]+$' src/ngx_*.[ch] /dev/null
 ack '^master_on' t /dev/null
+ack 'if \( !|if \(! ' src/ngx_*.[ch] /dev/null
 ack '\--- *(?:ONLY|LAST)' t /dev/null
 ack -l '\r\n' t /dev/null
 ack '\(\);' src/ngx_*.h /dev/null
