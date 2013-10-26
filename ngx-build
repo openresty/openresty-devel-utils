@@ -336,6 +336,8 @@ sub apply_patches {
     unless ($ver ge '001005003') {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-unix_socket_accept_over_read.patch");
     }
+
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-gzip_flush_bug.patch");
 }
 
 sub usage {
