@@ -338,6 +338,8 @@ sub apply_patches {
     }
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-gzip_flush_bug.patch");
+
+    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-cache_lock_hang_in_subreq.patch");
 }
 
 sub usage {
