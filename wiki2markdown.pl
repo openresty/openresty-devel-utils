@@ -118,8 +118,24 @@ $s =~ s/^==\s+(\S[^\n]*?)\s+==$/"$1\n" . ("-" x length $1)/gmse;
 $s =~ s/^===\s+(\S[^\n]*?)\s+===$/### $1\n/gms;
 $s =~ s/^====\s+(\S[^\n]*?)\s+====$/#### $1\n/gms;
 $s =~ s/^=====\s+(\S[^\n]*?)\s+=====$/##### $1\n/gms;
-$s =~ s!<geshi[^\n>]*>\n*(.*?)</geshi>!
-    my $v = $1; if ($v =~ /^ {0,3}\S/m) { $v =~ s/^/    /gm } "\n$v"!gmse;
+$s =~ s!<geshi([^\n>]*)>\n*(.*?)</geshi>!
+    my ($lang, $v) = ($1, $2);
+    if ($lang =~ /lang="?(\w+)/) {
+        $lang = $1;
+        if ($lang eq 'text') {
+            undef $lang;
+        }
+
+    } else {
+        undef $lang;
+    }
+    if ($v =~ /^ {0,3}\S/m) { $v =~ s/^/    /gm }
+    my $out = "\n$v";
+    if ($lang) {
+        $out = "```$lang\n$out```";
+    }
+    $out;
+    !gmse;
 $s =~ s{^https?://[^\s)(]+}{<$&>}gms;
 $s =~ s/^'''([^\n]*?)'''/(my $v = $1) =~ s{<}{\&lt;}g; $v =~ s{>}{\&gt;}g; "**$v**"/egms;
 while ($s =~ s/^(\S[^\n]*?)'''([^\n]*?)'''/$1**$2**/gms) {}
