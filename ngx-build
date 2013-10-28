@@ -337,7 +337,9 @@ sub apply_patches {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-unix_socket_accept_over_read.patch");
     }
 
-    shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-gzip_flush_bug.patch");
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-gzip_flush_bug.patch");
+    chdir ".." or die "cannot switch to ..\n";
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-cache_lock_hang_in_subreq.patch");
 
