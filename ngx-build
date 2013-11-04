@@ -344,6 +344,10 @@ sub apply_patches {
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-cache_lock_hang_in_subreq.patch");
 
     shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-proxy_host_port_vars.patch");
+
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-cache_manager_exit.patch");
+    chdir ".." or die "cannot switch to ..\n";
 }
 
 sub usage {
