@@ -3,8 +3,8 @@
 wiki_file=`perl -e 'print glob "doc/*.wiki"'`
 if [ -n "$wiki_file" -a  -f "$wiki_file" ]; then
     wiki2markdown.pl $wiki_file > README.markdown || exit 1
-    wiki2pod.pl $wiki_file > /tmp/a.pod || exit 1
-    pod2text /tmp/a.pod > README || exit 1
+    #wiki2pod.pl $wiki_file > /tmp/a.pod || exit 1
+    #pod2text /tmp/a.pod > README || exit 1
 fi
 
 ack '(?<=This document describes ).*-nginx-module v\d+(\.\d\S*)' README
