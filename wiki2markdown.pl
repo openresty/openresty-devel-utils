@@ -206,6 +206,12 @@ if (!($s =~ s/^(Name\n=+\n)(.*?)(^[^\n]+\n=+\n)/$1$2Table of Contents\n=========
     $s =~ s{^[^\n]+\n[=-]+\n}{ ++$i > 5 ? "[Back to TOC](#table-of-contents)\n\n$&" : $&}gesm;
 }
 
+$s =~ s{^```(\w+)\n(.*?)^```\n}{
+    my ($lang, $out) = ($1, $2);
+    $out =~ s/^    //gm;
+    "```$lang\n" . $out . "```\n"
+}gesm;
+
 print "<!---\nDon't edit this file manually! Instead you should generate it ",
     "by using:\n    wiki2markdown.pl $infile\n-->\n\n";
 print $s;

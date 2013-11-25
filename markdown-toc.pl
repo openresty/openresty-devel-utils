@@ -28,8 +28,32 @@ close $in;
 my $preamble = '';
 my @sections;
 my $section;
+my $verbatim;
 my $toc = '';
 while (1) {
+    if ($s =~ /\G^\`\`\`.*/gmc) {
+        $verbatim = !$verbatim;
+        if (!$section) {
+            $preamble .= $&;
+            #die "Bad line: $&";
+            next;
+        }
+
+        $section->[1] .= $&;
+        next;
+    }
+
+    if ($verbatim && $s =~ /\G.*\n/gmc) {
+        if (!$section) {
+            $preamble .= $&;
+            #die "Bad line: $&";
+            next;
+        }
+
+        $section->[1] .= $&;
+        next;
+    }
+
     if ($s =~ /\G^(\S[^\n]*)\n([-=])+\n/gsmc) {
         my ($title, $bar) = ($1, $2);
 
