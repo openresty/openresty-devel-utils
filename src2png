@@ -26,5 +26,5 @@ sed 's/ color: #000000;/ color: #eee;/g' $1.tmp > $1.html
 #echo "sed: $? $1.html"
 
 CutyCapt --url=$1.html --out=$1.png --zoom-factor=2 || exit 1
-convert -trim +repage -bordercolor black -border 15x15 $1.png $1.png
+convert -trim +repage -bordercolor black -border 50x50 $1.png $1.png
 
