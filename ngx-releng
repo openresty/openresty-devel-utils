@@ -11,17 +11,20 @@ ack '(?<=This document describes ).*-nginx-module v\d+(\.\d\S*)' README
 
 echo =======================================
 
+cfiles=`find src -name 'ngx_*.[ch]'`
+hfiles=`find src -name 'ngx_*.h'`
 ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null && exit 1
-ack '.{81}' src/ngx_*.[ch] /dev/null
-ack '(?<!:)//' src/ngx_*.[ch] /dev/null
-ack '[ \t]+$' src/ngx_*.[ch] /dev/null
+ack '.{81}' $cfiles /dev/null
+ack '(?<!:)//' $cfiles /dev/null
+ack '[ \t]+$' $cfiles /dev/null
 ack '^master_on' t /dev/null
-ack 'if \( |if \(! |if \(.*? \)' src/ngx_*.[ch] /dev/null
+ack 'if \( |if \(! |if \(.*? \)' $cfiles /dev/null
 ack '\--- *(?:ONLY|LAST)' t /dev/null
 ack -l '\r\n' t /dev/null
-ack '\(\);' src/ngx_*.h /dev/null
-ack '^static .*?\(\);' src/ngx_*.[ch] /dev/null
-ack '^[a-zA-Z]\w+\(\)$' src/ngx_*.[ch] /dev/null
+ack '\(\);' $hfiles /dev/null
+ack '^static .*?\(\);' $cfiles /dev/null
+ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
+ack '^\#\s*define\s+ngx_http_\w+?_version\s+\d+$' $cfiles /dev/null
 
 perl -e 'use strict; use warnings;
     for my $fname (@ARGV) {
@@ -53,7 +56,7 @@ perl -e 'use strict; use warnings;
             undef $func;
         }
         close $in;
-    }' src/ngx_*.[ch]
+    }' $cfiles
 
 perl -e 'use strict; use warnings;
     for my $fname (@ARGV) {
@@ -74,7 +77,7 @@ perl -e 'use strict; use warnings;
             undef $seen;
         }
         close $in;
-    }' src/ngx_*.[ch]
+    }' $cfiles
 
 perl -e 'use strict; use warnings;
     my $seen = 0;
@@ -110,9 +113,9 @@ perl -e 'use strict; use warnings;
             $seen = 0;
         }
         close $in;
-    }' src/ngx_*.[ch]
+    }' $cfiles
 
-ack '_log_error\(NGX_[^L]' src/ngx_*.[ch] /dev/null
+ack '_log_error\(NGX_[^L]' $cfiles /dev/null
 
 echo done.
 
