@@ -1,0 +1,81 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my (@records, $rec);
+my ($entered_mcode, $entered_ir);
+
+while (<>) {
+    if ($entered_mcode) {
+        if (/^[a-f0-9]+\s+\S+/) {
+            $rec->{mcode_cnt}++;
+            next;
+        }
+        undef $entered_mcode;
+        undef $rec;
+
+    } elsif ($entered_ir) {
+        if (/^\d+/) {
+            #warn "HERE";
+            $rec->{ir_cnt}++;
+            next;
+        }
+        undef $entered_ir;
+        undef $rec;
+    }
+
+    if (/^---- TRACE (\d+) mcode (\d+)/) {
+        my ($id, $mcode_size) = ($1, $2);
+        $entered_mcode = 1;
+        $rec = $records[$id];
+        if (!$rec) {
+            $rec = { mcode_size => $mcode_size, mcode_cnt => 0, ir_cnt => 0};
+            $records[$id] = $rec;
+        } else {
+            $rec->{mcode_size} = $mcode_size;
+        }
+        next;
+    }
+
+    if (/^---- TRACE (\d+) IR$/) {
+        my $id = $1;
+        $entered_ir = 1;
+        $rec = $records[$id];
+        if (!$rec) {
+            $rec = { mcode_size => 0, mcode_cnt => 0, ir_cnt => 0};
+            $records[$id] = $rec;
+        }
+        next;
+    }
+}
+
+#exit;
+
+my ($ir_cnt_sum, $mcode_size_sum, $mcode_cnt_sum) = (0, 0, 0);
+my ($max_mcode_size, $max_mcode_cnt) = (0, 0);
+for (my $i = 1; $i < @records; $i++) {
+    $rec = $records[$i];
+    #print "=== trace $i\n";
+    #print "ir count: $rec->{ir_cnt}\n";
+    #print "mcode count: $rec->{mcode_cnt}\n";
+    #print "mcode size: $rec->{mcode_size}\n";
+    $ir_cnt_sum += $rec->{ir_cnt};
+    $mcode_cnt_sum += $rec->{mcode_cnt};
+    $mcode_size_sum += $rec->{mcode_size};
+    if ($rec->{mcode_cnt} > $max_mcode_cnt) {
+        $max_mcode_cnt = $rec->{mcode_cnt};
+    }
+    if ($rec->{mcode_size} > $max_mcode_size) {
+        $max_mcode_size = $rec->{mcode_size};
+    }
+}
+
+my $ntraces = @records - 1;
+print "$ntraces traces:\n";
+printf "IR average count: %.0f\n", $ir_cnt_sum / $ntraces;
+printf "mcode average count: %.0f\n", $mcode_cnt_sum / $ntraces;
+printf "mcode average size: %.0f\n", $mcode_size_sum / $ntraces;
+printf "max mcode size: %d bytes\n", $max_mcode_size;
+printf "max mcode count: %d instructions\n", $max_mcode_cnt;
+
