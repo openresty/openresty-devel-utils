@@ -4,9 +4,24 @@ use strict;
 use warnings;
 
 sub file_contains ($$);
+sub process_file ($);
 
 my $version;
-for my $file (map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua }) {
+
+my @files;
+if (@ARGV) {
+    @files = @ARGV;
+
+} else {
+    @files = map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua };
+}
+
+for my $file (@files) {
+    process_file($file);
+}
+
+sub process_file ($) {
+    my $file = shift;
     # Check the sanity of each .lua file
     open my $in, $file or
         die "ERROR: Can't open $file for reading: $!\n";
