@@ -16,7 +16,7 @@ if (@ARGV) {
     @files = map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua };
 }
 
-for my $file (@files) {
+for my $file (sort @files) {
     process_file($file);
 }
 
