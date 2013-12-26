@@ -2,6 +2,10 @@
 
 use strict;
 use warnings;
+use Getopt::Std;
+
+my %opts;
+getopts("s", \%opts);
 
 my (@records, $rec);
 my ($entered_mcode, $entered_ir);
@@ -48,14 +52,29 @@ while (<>) {
         }
         next;
     }
+
+    if (/^---- TRACE (\d+) stop -> stitch/) {
+        my $id = $1;
+        $rec = $records[$id];
+        if (!$rec) {
+            warn "No record $id for $_";
+        }
+        $rec->{stitch} = 1;
+    }
 }
 
 #exit;
 
 my ($ir_cnt_sum, $mcode_size_sum, $mcode_cnt_sum) = (0, 0, 0);
-my ($max_mcode_size, $max_mcode_cnt) = (0, 0);
+my ($max_mcode_size, $max_mcode_cnt, $max_ir_cnt) = (0, 0, 0);
+my ($min_mcode_cnt, $min_ir_cnt);
+my $ntraces = 0;
 for (my $i = 1; $i < @records; $i++) {
     $rec = $records[$i];
+    if ($opts{s} && !$rec->{stitch}) {
+        next;
+    }
+    $ntraces++;
     #print "=== trace $i\n";
     #print "ir count: $rec->{ir_cnt}\n";
     #print "mcode count: $rec->{mcode_cnt}\n";
@@ -63,19 +82,35 @@ for (my $i = 1; $i < @records; $i++) {
     $ir_cnt_sum += $rec->{ir_cnt};
     $mcode_cnt_sum += $rec->{mcode_cnt};
     $mcode_size_sum += $rec->{mcode_size};
+
+    if (!defined $min_ir_cnt || $rec->{ir_cnt} < $min_ir_cnt) {
+        $min_ir_cnt = $rec->{ir_cnt};
+    }
+
+    if (!defined $min_mcode_cnt || $rec->{mcode_cnt} < $min_mcode_cnt) {
+        $min_mcode_cnt = $rec->{mcode_cnt};
+    }
+
     if ($rec->{mcode_cnt} > $max_mcode_cnt) {
         $max_mcode_cnt = $rec->{mcode_cnt};
     }
+
+    if ($rec->{ir_cnt} > $max_ir_cnt) {
+        $max_ir_cnt = $rec->{ir_cnt};
+    }
+
     if ($rec->{mcode_size} > $max_mcode_size) {
         $max_mcode_size = $rec->{mcode_size};
     }
 }
 
-my $ntraces = @records - 1;
-print "$ntraces traces:\n";
-printf "IR average count: %.0f\n", $ir_cnt_sum / $ntraces;
-printf "mcode average count: %.0f\n", $mcode_cnt_sum / $ntraces;
-printf "mcode average size: %.0f\n", $mcode_size_sum / $ntraces;
+print "trace count: $ntraces\n";
+printf "average IR count: %.0f\n", $ir_cnt_sum / $ntraces;
+printf "max IR count: %d\n", $max_ir_cnt;
+print "min IR count: ", (defined $min_ir_cnt ? $min_ir_cnt : "NO"), "\n";
+printf "average mcode count: %.0f\n", $mcode_cnt_sum / $ntraces;
+printf "max mcode instruction count: %d\n", $max_mcode_cnt;
+printf "min mcode instructions count: ", ($min_mcode_cnt || "NO"), "\n";
+printf "average mcode size: %.0f\n", $mcode_size_sum / $ntraces;
 printf "max mcode size: %d bytes\n", $max_mcode_size;
-printf "max mcode count: %d instructions\n", $max_mcode_cnt;
 
