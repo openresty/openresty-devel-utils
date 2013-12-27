@@ -8,7 +8,7 @@ my %opts;
 getopts("s", \%opts);
 
 my (@records, $rec);
-my ($entered_mcode, $entered_ir);
+my ($entered_mcode, $entered_ir, $entered_bc);
 
 while (<>) {
     if ($entered_mcode) {
@@ -19,7 +19,9 @@ while (<>) {
         undef $entered_mcode;
         undef $rec;
 
-    } elsif ($entered_ir) {
+    }
+
+    if ($entered_ir) {
         if (/^\d+/) {
             #warn "HERE";
             $rec->{ir_cnt}++;
@@ -27,6 +29,28 @@ while (<>) {
         }
         undef $entered_ir;
         undef $rec;
+
+    }
+
+    if ($entered_bc) {
+        if (/^\d+/) {
+            #warn "HERE";
+            $rec->{bc_cnt}++;
+            next;
+        }
+        undef $entered_bc;
+        undef $rec;
+    }
+
+    if (/^---- TRACE (\d+) start (\S+)/) {
+        my $id = $1;
+        $entered_bc = 1;
+        $rec = $records[$id];
+        if (!$rec) {
+            $rec = { bc_cnt => 0, mcode_size => 0, mcode_cnt => 0, ir_cnt => 0};
+            $records[$id] = $rec;
+        }
+        next;
     }
 
     if (/^---- TRACE (\d+) mcode (\d+)/) {
@@ -34,7 +58,7 @@ while (<>) {
         $entered_mcode = 1;
         $rec = $records[$id];
         if (!$rec) {
-            $rec = { mcode_size => $mcode_size, mcode_cnt => 0, ir_cnt => 0};
+            $rec = { bc_cnt => 0, mcode_size => 0, mcode_cnt => 0, ir_cnt => 0};
             $records[$id] = $rec;
         } else {
             $rec->{mcode_size} = $mcode_size;
@@ -47,7 +71,7 @@ while (<>) {
         $entered_ir = 1;
         $rec = $records[$id];
         if (!$rec) {
-            $rec = { mcode_size => 0, mcode_cnt => 0, ir_cnt => 0};
+            $rec = { bc_cnt => 0, mcode_size => 0, mcode_cnt => 0, ir_cnt => 0};
             $records[$id] = $rec;
         }
         next;
@@ -65,9 +89,9 @@ while (<>) {
 
 #exit;
 
-my ($ir_cnt_sum, $mcode_size_sum, $mcode_cnt_sum) = (0, 0, 0);
-my ($max_mcode_size, $max_mcode_cnt, $max_ir_cnt) = (0, 0, 0);
-my ($min_mcode_cnt, $min_ir_cnt);
+my ($bc_cnt_sum, $ir_cnt_sum, $mcode_size_sum, $mcode_cnt_sum) = (0, 0, 0, 0);
+my ($max_bc_cnt, $max_mcode_size, $max_mcode_cnt, $max_ir_cnt) = (0, 0, 0, 0);
+my ($min_bc_cnt, $min_mcode_cnt, $min_ir_cnt);
 my $ntraces = 0;
 for (my $i = 1; $i < @records; $i++) {
     $rec = $records[$i];
@@ -79,9 +103,14 @@ for (my $i = 1; $i < @records; $i++) {
     #print "ir count: $rec->{ir_cnt}\n";
     #print "mcode count: $rec->{mcode_cnt}\n";
     #print "mcode size: $rec->{mcode_size}\n";
+    $bc_cnt_sum += $rec->{bc_cnt};
     $ir_cnt_sum += $rec->{ir_cnt};
     $mcode_cnt_sum += $rec->{mcode_cnt};
     $mcode_size_sum += $rec->{mcode_size};
+
+    if (!defined $min_bc_cnt || $rec->{bc_cnt} < $min_bc_cnt) {
+        $min_bc_cnt = $rec->{bc_cnt};
+    }
 
     if (!defined $min_ir_cnt || $rec->{ir_cnt} < $min_ir_cnt) {
         $min_ir_cnt = $rec->{ir_cnt};
@@ -91,12 +120,16 @@ for (my $i = 1; $i < @records; $i++) {
         $min_mcode_cnt = $rec->{mcode_cnt};
     }
 
-    if ($rec->{mcode_cnt} > $max_mcode_cnt) {
-        $max_mcode_cnt = $rec->{mcode_cnt};
+    if ($rec->{bc_cnt} > $max_bc_cnt) {
+        $max_bc_cnt = $rec->{bc_cnt};
     }
 
     if ($rec->{ir_cnt} > $max_ir_cnt) {
         $max_ir_cnt = $rec->{ir_cnt};
+    }
+
+    if ($rec->{mcode_cnt} > $max_mcode_cnt) {
+        $max_mcode_cnt = $rec->{mcode_cnt};
     }
 
     if ($rec->{mcode_size} > $max_mcode_size) {
@@ -105,6 +138,9 @@ for (my $i = 1; $i < @records; $i++) {
 }
 
 print "trace count: $ntraces\n";
+printf "average bytecode count: %.0f\n", $bc_cnt_sum / $ntraces;
+printf "max bytecode count: %d\n", $max_bc_cnt;
+print "min bytecode count: ", (defined $min_bc_cnt ? $min_bc_cnt : "NO"), "\n";
 printf "average IR count: %.0f\n", $ir_cnt_sum / $ntraces;
 printf "max IR count: %d\n", $max_ir_cnt;
 print "min IR count: ", (defined $min_ir_cnt ? $min_ir_cnt : "NO"), "\n";
