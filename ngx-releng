@@ -17,9 +17,9 @@ ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null && exit 1
 ack '.{81}' $cfiles /dev/null
 ack '(?<!:)//' $cfiles /dev/null
 ack '[ \t]+$' $cfiles /dev/null
-ack '^master_on' t /dev/null
+ack '^master_on' `find t -name '*.t'` /dev/null
 ack 'if \( |if \(! |if \(.*? \)' $cfiles /dev/null
-ack '\--- *(?:ONLY|LAST)' t /dev/null
+ack '\--- *(?:ONLY|LAST)' `find t -name '*.t'` /dev/null
 ack -l '\r\n' t /dev/null
 ack '\(\);' $hfiles /dev/null
 ack '^static .*?\(\);' $cfiles /dev/null
