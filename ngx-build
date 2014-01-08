@@ -364,6 +364,10 @@ sub apply_patches {
         shell("patch -p0 < $root/../ngx_openresty/patches/patch.2013.space.txt");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-resolve-names-with-a-trailing-dot.patch");
+    chdir ".." or die "cannot switch to ..\n";
 }
 
 sub usage {
