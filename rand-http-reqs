@@ -15,12 +15,14 @@ my $port = 80;
 my $host = 'localhost';
 my $njobs = 1;
 my ($verbose, $help, @custom_headers);
+my $timeout = 5;
 
 GetOptions("concurrency|c=i" => \$njobs,
            "header|H=s@" => \@custom_headers,
            "help|h" => \$help,
            "host=s" => \$host,
            "port=i" => \$port,
+           "timeout=i" => \$timeout,
            "verbose" => \$verbose) or usage(1);
 
 if ($help) {
@@ -64,7 +66,7 @@ sub do_connect {
         PeerHost => $host,
         PeerPort => $port,
         Proto => 'tcp',
-        Timeout => 5,
+        Timeout => $timeout,
         Blocking => 0,
     ) or die "failed to connect to $host:$port: $!\n";
     return $sock;
@@ -200,7 +202,7 @@ sub send_request {
             if ($! =~ /Resource temporarily unavailable/i) {
                 sleep $delay;
                 $waited += $delay;
-                if ($waited >= 5) {
+                if ($waited >= $timeout) {
                     warn "Timed out: request: [", $req, "]\n";
                     return undef;
                 }
@@ -217,7 +219,7 @@ sub send_request {
 
         sleep $delay;
         $waited += $delay;
-        if ($waited >= 5) {
+        if ($waited >= $timeout) {
             warn "Timed out: request: [", $req, "]\n";
             return undef;
         }
@@ -250,7 +252,7 @@ sub read_response {
             if ($! =~ /Resource temporarily unavailable/i) {
                 sleep $delay;
                 $waited += $delay;
-                if ($waited >= 5) {
+                if ($waited >= $timeout) {
                     warn "Timed out: response: [", $resp, "]\n",
                          "request: [", $req, "]\n";
                     return undef;
