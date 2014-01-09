@@ -55,8 +55,10 @@ sub process_file ($) {
     close $in;
 
     print "Checking use of Lua global variables in file $file ...\n";
+    print "\top no.\tline\tinstruction\targs\t; code\n";
     system("luac -p -l $file | grep ETGLOBAL | grep -vE 'require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math|pcall|xpcall|unpack|pairs|ipairs|assert|module|package|coroutine|[gs]etfenv|next|rawget|rawset|rawlen'");
     #file_contains($file, "attempt to write to undeclared variable");
+    print "Checking line width exceeding 80 ...\n";
     system("grep -H -n -E --color '.{81}' $file");
 }
 
