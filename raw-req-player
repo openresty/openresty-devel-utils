@@ -1,0 +1,259 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use IO::Socket::INET ();
+use Time::HiRes qw( sleep );
+use Getopt::Long qw( GetOptions :config no_ignore_case );
+
+my $port = 80;
+my $host = 'localhost';
+my $njobs = 1;
+my ($verbose, $help);
+my $timeout = 5;
+my $num = -1;
+
+GetOptions("concurrency|c=i" => \$njobs,
+           "help|h" => \$help,
+           "host=s" => \$host,
+           "num=i" => \$num,
+           "port=i" => \$port,
+           "timeout=i" => \$timeout,
+           "verbose" => \$verbose) or usage(1);
+
+if ($help) {
+    usage(0);
+}
+
+my $request;
+
+$request = do { undef $/; <> };
+
+=begin cmt
+
+while (<>) {
+    if ($. == 1) { # request line
+        chomp;
+        $request .= "$_\r\n";
+        next;
+    }
+
+    chomp;
+    $request .= "$_\r\n";
+}
+
+if ($request !~ /\r\n\r\n$/s) {
+    $request .= "\r\n";
+}
+
+=end cmt
+
+=cut
+
+#print $request;
+
+sub send_request {
+    my $sock = shift;
+    my $req = shift;
+    my $rest = length $req;
+    my $delay = 0.001;
+    my $waited = 0;
+    while (1) {
+        my $bytes = $sock->send($req);
+        if (!$bytes) {
+            if ($! =~ /Resource temporarily unavailable/i) {
+                sleep $delay;
+                $waited += $delay;
+                if ($waited >= $timeout) {
+                    warn "Timed out: request: [", $req, "]\n";
+                    return undef;
+                }
+                next;
+            }
+            warn "failed to send request: $!\n";
+            return undef;
+        }
+        $rest -= $bytes;
+        if ($rest == 0) {
+            #warn "request sent";
+            return 1;
+        }
+
+        sleep $delay;
+        $waited += $delay;
+        if ($waited >= $timeout) {
+            warn "Timed out: request: [", $req, "]\n";
+            return undef;
+        }
+    }
+}
+
+sub check_status_code {
+    my $resp = shift;
+    my $status;
+    if ($resp =~ m{^HTTP/1\.\d+\s+(\d+)}) {
+        $status = $1;
+    }
+    if ($status != 200) {
+        warn "Found status $status.\n";
+    }
+}
+
+sub read_response {
+    my $sock = shift;
+    my $req = $request;
+    my $resp = '';
+    my $waited = 0;
+    my $delay = 0.001;
+    while (1) {
+        my $bytes = sysread($sock, my $buf, 1024);
+        if (!defined $bytes) {
+            if ($! =~ /Resource temporarily unavailable/i) {
+                sleep $delay;
+                $waited += $delay;
+                if ($waited >= $timeout) {
+                    warn "Timed out: response: [", $resp, "]\n",
+                         "request: [", $req, "]\n";
+                    return undef;
+                }
+                next;
+            }
+            warn "Failed to recv: $! ($resp)\n";
+            return undef;
+        }
+        if ($bytes == 0) {
+            #warn "Connection closed.\n";
+            return undef;
+        }
+        $resp .= $buf;
+        #warn "received: ", $resp;
+        if ($resp =~ /^Transfer-Encoding:\s+chunked\r\n/ims) {
+            if ($resp =~ /^0\r\n\r\n$/sm) {
+                #warn "$resp";
+                check_status_code($resp);
+                return 1;
+            }
+
+        } elsif ($resp =~ /^Content-Length:\s+(\d+)\r\n/ims) {
+            my $len = $1;
+            if ($resp =~ /\r\n\r\n(.*)/s) {
+                my $body = $1;
+                if (length($body) >= $len) {
+                    #warn "$resp";
+                    check_status_code($resp);
+                    return 1;
+                }
+            }
+
+        } else {
+            if ($resp =~ /\r\n\r\n\z/sm) {
+                #warn "$resp";
+                check_status_code($resp);
+                return 1;
+            }
+        }
+    }
+}
+
+sub process {
+    my $job_id = shift;
+    my $sock = do_connect();
+    my $i = 0;
+    while ($num < 0 || $i < $num) {
+        if (!send_request($sock, $request)) {
+            close $sock;
+            $sock = do_connect();
+            next;
+        }
+
+        if (!read_response($sock)) {
+            close $sock;
+            $sock = do_connect();
+            next;
+        }
+        ++$i;
+        print "\r[$job_id] request $i";
+    }
+}
+
+my @child_pids;
+
+sub cleanup {
+    #warn "CLENAUP!!!";
+    for my $pid (@child_pids) {
+        warn "killing child $pid...\n";
+        kill(9, $pid);
+        waitpid($pid, 0);
+    }
+};
+
+sub do_connect {
+    #print "connecting...";
+    my $sock = IO::Socket::INET->new(
+        PeerHost => $host,
+        PeerPort => $port,
+        Proto => 'tcp',
+        Timeout => $timeout,
+        Blocking => 0,
+    ) or die "failed to connect to $host:$port: $!\n";
+    return $sock;
+}
+
+$| = 1;
+#die gen_req();
+
+my $in_child;
+for (my $i = 0; $i < $njobs; $i++) {
+    #warn "forking job $i\n";
+    my $pid = fork();
+    if (!defined $pid) {
+        die "failed to fork: $!\n";
+    }
+
+    if ($pid == 0) {
+        $in_child = 1;
+        process($i);
+        exit();
+
+    } else {
+        push @child_pids, $pid;
+    }
+}
+
+for my $pid (@child_pids) {
+    waitpid($pid, 0);
+}
+
+sub END {
+    cleanup() unless $in_child;
+}
+
+sub usage {
+    my $fatal = shift;
+    my $msg = <<_EOC_;
+Usage: $0 [options]
+Options:
+    --concurrency <num>
+    -c <num>             Specifies the concurrency level. Default to 1.
+
+    --help
+    -h                   Print this usage.
+
+    --host <host>        Specifies the host name for the target server.
+                         Default to localhost.
+
+    -n <count>           Number of requests
+
+    --port <port>
+    -p <port>            Specifies the target port number. Default to 80.
+
+    --verbose
+    -v                   More verbose information.
+_EOC_
+    if ($fatal) {
+        die $msg;
+    }
+    print $msg;
+    exit(0);
+}
