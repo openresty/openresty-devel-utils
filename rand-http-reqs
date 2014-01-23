@@ -16,11 +16,13 @@ my $host = 'localhost';
 my $njobs = 1;
 my ($verbose, $help, @custom_headers);
 my $timeout = 5;
+my $num = -1;
 
 GetOptions("concurrency|c=i" => \$njobs,
            "header|H=s@" => \@custom_headers,
            "help|h" => \$help,
            "host=s" => \$host,
+           "num=i" => \$num,
            "port=i" => \$port,
            "timeout=i" => \$timeout,
            "verbose" => \$verbose) or usage(1);
@@ -62,26 +64,37 @@ sub load_ua {
 
 sub do_connect {
     #print "connecting...";
-    my $sock = IO::Socket::INET->new(
-        PeerHost => $host,
-        PeerPort => $port,
-        Proto => 'tcp',
-        Timeout => $timeout,
-        Blocking => 0,
-    ) or die "failed to connect to $host:$port: $!\n";
-    return $sock;
+    my ($sock, $i);
+    for ($i = 0; $i < 2000000; $i++) {
+        $sock = IO::Socket::INET->new(
+            PeerHost => $host,
+            PeerPort => $port,
+            Proto => 'tcp',
+            Timeout => $timeout,
+            Blocking => 0,
+        );
+
+        if (!$sock) {
+            warn "failed to connect to $host:$port: $!\n";
+            sleep 1;
+            next;
+        }
+
+        return $sock;
+    }
+    die "failed to connect. aborted.\n";
 }
 
 sub gen_ua {
     my $n = int rand 100;
-    if ($n == 0) {
+    #if ($n == 0) {
         #warn "empty ua";
-        return '';
-    }
-    if ($n == 2) {
+        #return '';
+    #}
+    #if ($n == 2) {
         #warn "no ua";
-        return undef;
-    }
+        #return undef;
+    #}
     my $i = int rand scalar @ua;
     return $ua[$i];
 }
@@ -297,7 +310,7 @@ sub process {
     my $job_id = shift;
     my $sock = do_connect();
     my $i = 0;
-    while (1) {
+    while ($num < 0 || $i < $num) {
         if (!send_request($sock)) {
             close $sock;
             $sock = do_connect();
@@ -362,6 +375,8 @@ Usage: $0 [options]
 Options:
     --concurrency <num>
     -c <num>             Specifies the concurrency level. Default to 1.
+
+    -n <num>             Specifies the number of requests generated per worker
 
     --header <header>
     -H <header>          Specifiy extra request headers in the form
