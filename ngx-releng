@@ -7,7 +7,7 @@ if [ -n "$wiki_file" -a  -f "$wiki_file" ]; then
     #pod2text /tmp/a.pod > README || exit 1
 fi
 
-ack '(?<=This document describes ).*-nginx-module v\d+(\.\d\S*)' README
+ack '(?<=This document describes )(?:.*-nginx-module|ngx_\w+) .*?v(\d+\.\d[^\s\]]*)' README.markdown
 
 echo =======================================
 
