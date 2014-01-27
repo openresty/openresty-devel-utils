@@ -34,6 +34,7 @@ sub process_file ($) {
             $skipping = $2;
             $ver =~ s{^(\d+)\.(\d{3})(\d{3})$}{join '.', int($1), int($2), int($3)}e;
             warn "$file: $orig_ver ($ver)\n";
+            last;
 
         } elsif (/(?x) (?:_VERSION|version) \s* = \s* ([a-zA-Z_]\S*)/) {
             warn "$file: $1\n";
