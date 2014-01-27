@@ -3,37 +3,13 @@
 use strict;
 use warnings;
 
-sub process_file ($);
+use Getopt::Std;
 
-my $version;
+my @luas;
+my @tests;
 
 my $silent = 0;
-
-my @files;
-my @tests;
-if (@ARGV) {
-    if ($ARGV[0] eq '-silent') {
-        shift @ARGV;
-        $silent = 1;
-    }
-}
-
-if ($#ARGV != -1) {
-    @files = @ARGV;
-} else {
-    @files = map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua };
-    if (-d 't') {
-        @tests = map glob, qw{ t/*.t t/*/*.t t/*/*/*.t };
-    }
-}
-
-for my $file (sort @files) {
-    process_file($file);
-}
-
-for my $file (@tests) {
-    blank(qq{grep -H -n --color -E '\\--- ?(ONLY|LAST)' $file});
-}
+my $stop_on_error = 0;
 
 # p: prints a string to STDOUT appending \n
 # w: prints a string to STDERR appending \n
@@ -41,13 +17,21 @@ for my $file (@tests) {
 sub p { print "$_[0]\n" if (!$silent) }
 sub w { warn  "$_[0]\n" if (!$silent) }
 
-# blank: runs a command and dies if it produces any output
+# blank: runs a command and looks at the output. If the output is not
+# blank it is printed (and the program dies if stop_on_error is 1)
 sub blank {
     my ($command) = @_;
     my $output = `$command`;
-    die $output if ($output ne '');
+    if ($output ne '') {
+        if ($stop_on_error) {
+            die $output;
+        } else {
+            w($output);
+        }
+    }
 }
 
+my $version;
 sub process_file ($) {
     my $file = shift;
     # Check the sanity of each .lua file
@@ -88,3 +72,24 @@ sub process_file ($) {
     blank("grep -H -n -E --color '.{81}' $file");
 }
 
+our($opt_s, $opt_e);
+getopts('se') or die "Usage: lua-releng (-s) (-e) (<files>)\n";
+$silent = (($opt_s || 0) == 1);
+$stop_on_error = (($opt_e || 0) == 1);
+
+if ($#ARGV != -1) {
+    @luas = @ARGV;
+} else {
+    @luas = map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua };
+    if (-d 't') {
+        @tests = map glob, qw{ t/*.t t/*/*.t t/*/*/*.t };
+    }
+}
+
+for my $f (sort @luas) {
+    process_file($f);
+}
+
+for my $t (@tests) {
+    blank(qq{grep -H -n --color -E '\\--- ?(ONLY|LAST)' $t});
+}
