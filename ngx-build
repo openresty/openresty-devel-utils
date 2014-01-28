@@ -365,9 +365,11 @@ sub apply_patches {
         chdir ".." or die "cannot switch to ..\n";
     }
 
-    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-resolve-names-with-a-trailing-dot.patch");
-    chdir ".." or die "cannot switch to ..\n";
+    unless ($ver ge '001005009') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-resolve-names-with-a-trailing-dot.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-setting_args_invalidates_uri.patch");
