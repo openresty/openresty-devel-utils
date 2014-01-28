@@ -21,13 +21,13 @@ sub w { warn  "$_[0]\n" if (!$silent) }
 # blank it is printed (and the program dies if stop_on_error is 1)
 sub blank {
     my ($command) = @_;
-    my $output = `$command`;
-    if ($output ne '') {
-        if ($stop_on_error) {
+    if ($stop_on_error) {
+        my $output = `$command`;
+        if ($output ne '') {
             die $output;
-        } else {
-            w($output);
         }
+    } else {
+        system($command);
     }
 }
 
