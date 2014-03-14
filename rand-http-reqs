@@ -14,7 +14,7 @@ use File::Spec ();
 my $port = 80;
 my $host = 'localhost';
 my $njobs = 1;
-my ($verbose, $help, @custom_headers);
+my ($verbose, $help, @custom_headers, $seed);
 my $timeout = 5;
 my $num = -1;
 
@@ -24,6 +24,7 @@ GetOptions("concurrency|c=i" => \$njobs,
            "host=s" => \$host,
            "num=i" => \$num,
            "port=i" => \$port,
+           "seed=i" => \$seed,
            "timeout=i" => \$timeout,
            "verbose" => \$verbose) or usage(1);
 
@@ -43,6 +44,17 @@ for my $h (@custom_headers) {
         $custom_ua_header = 1;
     }
 }
+
+use Math::Random::Secure;
+
+if (!defined $seed) {
+    $seed = int(Math::Random::Secure::rand(2**31));
+}
+
+#$seed = 0;
+#my $seed = 1271164558;
+warn "seed: $seed\n";
+srand($seed);
 
 my $strgen = String::Random->new;
 
