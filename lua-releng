@@ -10,12 +10,13 @@ my (@luas, @tests);
 my %opts;
 getopts('Lse', \%opts) or die "Usage: lua-releng [-L] [-s] [-e] [files]\n";
 
-my $silent = $opts{s}
-my $stop_on_error = $opt{e}
+my $silent = $opts{s};
+my $stop_on_error = $opts{e};
 my $no_long_line_check = $opts{L};
 
 if ($#ARGV != -1) {
     @luas = @ARGV;
+
 } else {
     @luas = map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua };
     if (-d 't') {
@@ -51,7 +52,7 @@ sub blank {
 }
 
 my $version;
-sub process_file ($) {
+sub process_file {
     my $file = shift;
     # Check the sanity of each .lua file
     open my $in, $file or
