@@ -24,21 +24,21 @@ my $s = do { local $/; <$in> };
 close $in;
 
 my %github_mods = (
-    HttpSetMiscModule => 'agentzh/set-misc-nginx-module',
-    HttpEchoModule => 'agentzh/echo-nginx-module',
-    HttpLuaModule => 'chaoslawful/lua-nginx-module',
-    HttpMemcModule => 'agentzh/memc-nginx-module',
-    HttpRedis2Module => 'agentzh/redis2-nginx-module',
+    HttpSetMiscModule => 'openresty/set-misc-nginx-module',
+    HttpEchoModule => 'openresty/echo-nginx-module',
+    HttpLuaModule => 'openresty/lua-nginx-module',
+    HttpMemcModule => 'openresty/memc-nginx-module',
+    HttpRedis2Module => 'openresty/redis2-nginx-module',
     HttpChunkinModule => 'agentzh/chunkin-nginx-module',
-    HttpArrayVarModule => 'agentzh/array-var-nginx-module',
-    HttpSRCacheModule => 'agentzh/srcache-nginx-module',
-    HttpEncryptedSessionModule => 'agentzh/encrypted-session-nginx-module',
-    HttpHeadersMoreModule => 'agentzh/headers-more-nginx-module',
-    HttpDrizzleModule => 'chaoslawful/drizzle-nginx-module',
-    HttpRdsJsonModule => 'agentzh/rds-json-nginx-module',
-    HttpRdsCsvModule => 'agentzh/rds-csv-nginx-module',
-    LuaRdsParser => 'agentzh/lua-rds-parser',
-    LuaRedisParser => 'agentzh/lua-redis-parser',
+    HttpArrayVarModule => 'openresty/array-var-nginx-module',
+    HttpSRCacheModule => 'openresty/srcache-nginx-module',
+    HttpEncryptedSessionModule => 'openresty/encrypted-session-nginx-module',
+    HttpHeadersMoreModule => 'openresty/headers-more-nginx-module',
+    HttpDrizzleModule => 'openresty/drizzle-nginx-module',
+    HttpRdsJsonModule => 'openresty/rds-json-nginx-module',
+    HttpRdsCsvModule => 'openresty/rds-csv-nginx-module',
+    LuaRdsParser => 'openresty/lua-rds-parser',
+    LuaRedisParser => 'openresty/lua-redis-parser',
 );
 
 my %official_mods = (
