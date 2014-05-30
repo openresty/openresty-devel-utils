@@ -14,7 +14,7 @@ use File::Spec ();
 my $port = 80;
 my $host = 'localhost';
 my $njobs = 1;
-my ($verbose, $help, @custom_headers, $seed);
+my ($verbose, $help, @custom_headers, $seed, $url_prefix);
 my $timeout = 5;
 my $num = -1;
 
@@ -26,6 +26,7 @@ GetOptions("concurrency|c=i" => \$njobs,
            "port=i" => \$port,
            "seed=i" => \$seed,
            "timeout=i" => \$timeout,
+           "prefix=s" => \$url_prefix,
            "verbose" => \$verbose) or usage(1);
 
 if ($help) {
@@ -167,12 +168,20 @@ sub gen_uri_comp {
 sub gen_path {
     my $n = int rand 20;
     my @comp;
+    if ($url_prefix) {
+        push @comp, $url_prefix;
+    }
     for (my $i = 0; $i < $n; $i++) {
         my $value = gen_uri_comp();
         #warn "uri comp: $value";
         push @comp, $value;
     }
-    return "/" . join "/", @comp;
+    my $url = join "/", @comp;
+    if (!$url_prefix) {
+        return "/" . $url;
+    }
+    #warn "$url\n";
+    return $url;
 }
 
 sub gen_args {
@@ -259,7 +268,7 @@ sub check_status_code {
     }
     if ($status != 200) {
         if ($verbose) {
-            warn "Found status $status: request: [", $req, "].\n";
+            warn "Found status $status: request: [$req] response.\n";
         } else {
             warn "Found status $status.\n";
         }
@@ -284,7 +293,7 @@ sub read_response {
                 }
                 next;
             }
-            warn "Failed to recv: $! ($resp)\n";
+            warn "[", scalar(localtime()), "] Failed to recv: $! ($resp)\n";
             return undef;
         }
         if ($bytes == 0) {
