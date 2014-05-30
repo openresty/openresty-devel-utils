@@ -90,8 +90,18 @@ sub gen_link {
     return undef;
 }
 
+my %inline_toc;
+my @inline_toc_titles;
 sub gen_toc ($) {
     my $s = shift;
+    while ($s =~ /^(=+)\s+(\S[^\n]*?)\s+\1\s+<!--\s*inline-toc\s*-->/gsm) {
+        my ($prefix, $title) = ($1, $2);
+        $inline_toc{$title} = '';
+        #warn "inline toc: $prefix: $title";
+        push @inline_toc_titles, $title;
+    }
+    my $exit_level;
+    my $toc_insert_title;
     my $toc = '';
     open my $in, "<", \$s or die $!;
     while (<$in>) {
@@ -99,6 +109,22 @@ sub gen_toc ($) {
             my ($prefix, $title) = ($1, $2);
             my $anchor = gen_anchor($title);
             my $level = length($prefix) - 1;
+            if (defined $inline_toc{$title}) {
+                $exit_level = $level;
+                $toc_insert_title = $title;
+
+            } elsif (defined $exit_level) {
+                if ($level <= $exit_level) {
+                    undef $exit_level;
+
+                } else {
+                    my $inlined_toc = ("    " x ($level - $exit_level - 1))
+                                      . "* [$title](#$anchor)\n";
+                    $inline_toc{$toc_insert_title} .= $inlined_toc;
+                    #warn "inlined toc: $inlined_toc";
+                    next;
+                }
+            }
             $toc .= ("    " x $level) . "* [$title](#$anchor)\n";
         }
     }
@@ -212,6 +238,18 @@ $s =~ s{^```(\w+)\n(.*?)^```\n}{
     $out =~ s/^    //gm;
     "```$lang\n" . $out . "```\n"
 }gesm;
+
+$s =~ s{<!--\s*inline-toc\s*-->}{
+    my $title = shift @inline_toc_titles;
+    if (!defined $title) {
+        die "Cannot find the corresponding section for the special comment \"$&\".\n";
+    }
+    my $toc = $inline_toc{$title};
+    if (!defined $toc) {
+        die "No TOC defined for section $title\n";
+    }
+    $toc
+}egms;
 
 print "<!---\nDon't edit this file manually! Instead you should generate it ",
     "by using:\n    wiki2markdown.pl $infile\n-->\n\n";
