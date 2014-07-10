@@ -83,19 +83,40 @@ perl -e 'use strict; use warnings;
     my $seen = 0;
     my $saved;
     my $indent;
+
+    my $supfile = "./ngx-releng.suppress";
+    my %whitelist;
+    if (open my $sup, "<$supfile") {
+        while (<$sup>) {
+            if (/^(\S+:\d+)$/) {
+                #warn "loaded rule $1\n";
+                $whitelist{$1} = 1;
+            }
+        }
+    }
+
     for my $fname (@ARGV) {
         open my $in, $fname or die $!;
         while (<$in>) {
             next if /^\s*$/ || m{^\s*/\*};
-            if (/ngx_p[cn]*alloc\b|\b[mc]alloc\b|\bngx_array_push\b|\bngx_array_create\b|\bngx_alloc_chain_link\b|\bngx_c?alloc_buf\b/) {
+            if (/ngx_p[cn]*alloc\b|\b[mc]alloc\b|\bngx_array_push\b|\bngx_array_create\b|\bngx_alloc_chain_link\b|\bngx_c?alloc_buf\b|\bngx_create_temp_buf\b/) {
                 my $pattern = $&;
-                if (!/return\b.*?$pattern/ && !/"[^"]*$pattern/ && !/^\s+\*/) {
+                #warn "got pattern: $pattern\n";
+                if (!/return\b.*?\Q$pattern\E/ && !/"[^"]*\Q$pattern\E/ && !/^\s+\*/) {
                     if (/^\s+/) {
                         $indent = $&;
                     } else {
                         $indent = "";
                     }
-                    $seen = 1;
+
+                    if (/(\S+)\s*=\s*\Q$pattern\E/) {
+                        #warn "seen var $1\n";
+                        $seen = $1;
+
+                    } else {
+                        $seen = 1;
+                    }
+
                     $saved = $_;
                     next;
                 }
@@ -106,11 +127,36 @@ perl -e 'use strict; use warnings;
                         next;
                     }
                 }
-                if (!/\bif\b.*? == NULL/) {
-                    warn "not check NULL: $fname: line $.: $saved$_";
+
+                if (($seen ne 1 && !/\bif\b.*?\Q$seen\E\s*==\s*NULL/)
+                    || ($seen eq 1 && !/\bif\b.*?\s*==\s*NULL/))
+                {
+                    if (!$whitelist{"$fname:$."}) {
+                        warn "not check NULL: $fname: line $.: $saved$_";
+                    }
                 }
             }
             $seen = 0;
+        }
+        close $in;
+    }' $cfiles
+
+perl -e 'use strict; use warnings;
+    for my $fname (@ARGV) {
+        my $seen;
+        open my $in, $fname or die $!;
+        while (<$in>) {
+            if (/^[a-z]\w*:$/) {
+                $seen = $_;
+                next;
+            }
+            if ($seen && !/^$/) {
+                my $ln = $. - 1;
+                print "$fname:$ln: \e[33m$seen\e[0m";
+                undef $seen;
+                next;
+            }
+            undef $seen;
         }
         close $in;
     }' $cfiles
