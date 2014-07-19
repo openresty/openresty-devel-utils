@@ -90,7 +90,7 @@ sub gen_link {
     return undef;
 }
 
-my %inline_toc;
+my (%inline_toc, %inline_backtotoc);
 my @inline_toc_titles;
 sub gen_toc ($) {
     my $s = shift;
@@ -103,10 +103,18 @@ sub gen_toc ($) {
     my $exit_level;
     my $toc_insert_title;
     my $toc = '';
+    my $prev_inline_subtitle;
     open my $in, "<", \$s or die $!;
     while (<$in>) {
         if (/^(=+)\s+(\S[^\n]*?)\s+\1$/) {
             my ($prefix, $title) = ($1, $2);
+
+            if (defined $prev_inline_subtitle) {
+                #warn "insert: $title => $toc_insert_title\n";
+                $inline_backtotoc{$title} = $toc_insert_title;
+                undef $prev_inline_subtitle;
+            }
+
             my $anchor = gen_anchor($title);
             my $level = length($prefix) - 1;
             if (defined $inline_toc{$title}) {
@@ -121,6 +129,7 @@ sub gen_toc ($) {
                     my $inlined_toc = ("    " x ($level - $exit_level - 1))
                                       . "* [$title](#$anchor)\n";
                     $inline_toc{$toc_insert_title} .= $inlined_toc;
+                    $prev_inline_subtitle = 1;
                     #warn "inlined toc: $inlined_toc";
                     next;
                 }
@@ -128,11 +137,19 @@ sub gen_toc ($) {
             $toc .= ("    " x $level) . "* [$title](#$anchor)\n";
         }
     }
+
+    if ($prev_inline_subtitle) {
+        $inline_backtotoc{"__eof__"} = $toc_insert_title;
+        undef $prev_inline_subtitle;
+    }
     return $toc;
 }
 
 my $toc = gen_toc($s);
 #warn $toc;
+
+#use Data::Dumper;
+#warn Dumper(\%inline_backtotoc);
 
 #warn sprintf "%02x (%s)", ord(substr($s, 0, 1)), substr($s, 0, 1);
 #warn sprintf "%02x (%s)", ord(substr($s, 1, 1)), substr($s, 1, 1);
@@ -230,7 +247,30 @@ if (!($s =~ s/^(Name\n=+\n)(.*?)(^[^\n]+\n=+\n)/$1$2Table of Contents\n=========
 
 } else {
     my $i = 0;
-    $s =~ s{^[^\n]+\n[=-]+\n}{ ++$i > 5 ? "[Back to TOC](#table-of-contents)\n\n$&" : $&}gesm;
+    $s =~ s{^([^\n]+)\n[=-]+\n}{
+        my $title = $1;
+        if (++$i <= 5) {
+            # intact
+            $&;
+
+        } else {
+            my $target = $inline_backtotoc{$title};
+            if ($target) {
+                #warn "HIT: $title => $target\n";
+
+            } else {
+                $target = "Table of Contents";
+            }
+            $target = gen_anchor($target);
+            "[Back to TOC](#$target)\n\n$&";
+        }
+    }gesm;
+
+    my $target = $inline_backtotoc{"__eof__"};
+    if ($target) {
+        $target = gen_anchor($target);
+        $s .= "\n[Back to TOC](#$target)\n";
+    }
 }
 
 $s =~ s{^```(\w+)\n(.*?)^```\n}{
