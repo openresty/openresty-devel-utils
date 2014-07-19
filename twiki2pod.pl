@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+print "=encoding utf-8\n\n";
+
 my $level = 0;
 while (<>) {
     my $new_level;
