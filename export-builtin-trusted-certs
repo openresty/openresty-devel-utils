@@ -1,0 +1,34 @@
+#!/usr/bin/env perl
+
+# Usage:
+#   mkdir -p ~/.pki/nssdb
+#   certutil -d ~/.pki/nssdb -N
+#   ln -sf /usr/lib64/libnssckbi.so ~/.pki/nssdb/
+#   ./export-builtin-trusted-certs > all-in-one.crt
+#   ./export-builtin-trusted-certs 'GeoTrust' > geotrust.crt
+
+use strict;
+use warnings;
+
+use File::HomeDir ();
+
+my $home = File::HomeDir->my_home;
+
+my $pat = shift;
+my $cmd = "certutil -L -d sql:$home/.pki/nssdb/ -h 'Builtin Object Token'";
+if ($pat) {
+    $cmd .= "|grep '$pat'";
+}
+
+my @names = grep { $_ } map { s/\s+\S+\s*$//; $_ } split /\n/, `$cmd`;
+if ($names[0] =~ /Certificate Nickname/) {
+    shift @names;
+}
+#print join "\n", @names;
+
+for my $name (@names) {
+    warn "exporting \"$name\"\n";
+    system("certutil", "-L", "-d", "sql:$home/.pki/nssdb/", '-a', '-n', $name) == 0
+        or warn "failed to export certificate \"$name\".\n";
+}
+
