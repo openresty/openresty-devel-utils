@@ -391,6 +391,10 @@ sub apply_patches {
         shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-slab_defrag.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-proxy_ssl_handshake_timer.patch");
+    chdir ".." or die "cannot switch to ..\n";
 }
 
 sub usage {
