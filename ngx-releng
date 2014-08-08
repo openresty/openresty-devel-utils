@@ -100,7 +100,7 @@ perl -e 'use strict; use warnings;
         open my $in, $fname or die $!;
         while (<$in>) {
             next if /^\s*$/ || m{^\s*/\*};
-            if (/ngx_p[cn]*alloc\b|\b[mc]alloc\b|\bngx_array_push\b|\bngx_array_create\b|\bngx_alloc_chain_link\b|\bngx_c?alloc_buf\b|\bngx_create_temp_buf\b/) {
+            if (/ngx_(?:p[cn]*)?alloc\b|\b[mc]alloc\b|\bngx_array_push\b|\bngx_array_create\b|\bngx_alloc_chain_link\b|\bngx_c?alloc_buf\b|\bngx_create_temp_buf\b/) {
                 my $pattern = $&;
                 #warn "got pattern: $pattern\n";
                 if (!/return\b.*?\Q$pattern\E/ && !/"[^"]*\Q$pattern\E/ && !/^\s+\*/) {
