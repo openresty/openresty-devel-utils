@@ -8,9 +8,13 @@ perl twiki2pod.pl a.twiki \
     | sed 's/\<LuaRestyCoreLibrary\>/the lua-resty-core library/' \
     | sed 's/\<LuaRestyUpstreamHealthcheckLibrary\>/the lua-resty-upstream-healthcheck library/' \
     | sed 's/\<LuaRestyDNSLibrary\>/the lua-resty-dns library/' \
+    | sed 's/\<LuaRestyWebSocketLibrary\>/the lua-resty-websocket library/' \
+    | sed 's/\<LuaRestyMySQLLibrary\>/the lua-resty-mysql library/' \
     | sed 's/\<LuaRestyLrucacheLibrary\>/the lua-resty-lrucache library/' \
     | sed 's/\<EchoNginxModule\>/the ngx_echo module/' \
+    | sed 's/\<SetMiscNginxModule\>/the ngx_set_misc module/' \
+    | sed 's/\<PostgresNginxModule\>/the ngx_postgres module/' \
     | sed 's/\<MemcNginxModule\>/the ngx_memc module/' \
+    | sed 's/\<Redis2NginxModule\>/the ngx_redis2 module/' \
     | sed 's/\<FormInputNginxModule\>/the ngx_form_input module/'
-
 
