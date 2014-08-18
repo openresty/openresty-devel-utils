@@ -164,5 +164,27 @@ perl -e 'use strict; use warnings;
 
 ack '_log_error\(NGX_[^L]' $cfiles /dev/null
 
+perl -e 'use strict; use warnings;
+    for my $fname (@ARGV) {
+        my $seen;
+        open my $in, $fname or die $!;
+        while (<$in>) {
+            if (/^ngx_\w+?_create_(loc|srv|main)_conf\s*\(/) {
+                $seen = 1;
+                next;
+            }
+            if ($seen && /\breturn\s+NGX_CONF_ERROR/) {
+                my $ln = $.;
+                $seen = $_;
+                print "$fname:$ln: \e[33m$seen\e[0m";
+                next;
+            }
+            if (/^}$/) {
+                undef $seen;
+            }
+        }
+    }
+' $cfiles
+
 echo done.
 
