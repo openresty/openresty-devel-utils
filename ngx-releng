@@ -13,6 +13,7 @@ echo =======================================
 
 cfiles=`find src -name 'ngx_*.[ch]'`
 hfiles=`find src -name 'ngx_*.h'`
+
 ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null && exit 1
 ack '.{81}' $cfiles /dev/null
 ack '(?<!:)//' $cfiles /dev/null
@@ -26,6 +27,7 @@ ack '\(\);' $hfiles /dev/null
 ack '^static .*?\(\);' $cfiles /dev/null
 ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
 ack '^\#\s*define\s+ngx_http_\w+?_version\s+\d+$' $cfiles /dev/null
+ack '\b(?:if|for|while)\(|\bdo\{' $cfiles /dev/null
 
 perl -e 'use strict; use warnings;
     for my $fname (@ARGV) {
