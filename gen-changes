@@ -6,6 +6,7 @@ perl twiki2pod.pl a.twiki \
     | sed 's/\<LuaNginxModule\>/the ngx_lua module/' \
     | sed 's/\<SrcacheNginxModule\>/the ngx_srcache module/' \
     | sed 's/\<LuaRestyCoreLibrary\>/the lua-resty-core library/' \
+    | sed 's/\<LuaCjsonLibrary\>/the lua-cjson library/' \
     | sed 's/\<LuaRestyUpstreamHealthcheckLibrary\>/the lua-resty-upstream-healthcheck library/' \
     | sed 's/\<LuaRestyDNSLibrary\>/the lua-resty-dns library/' \
     | sed 's/\<LuaRestyWebSocketLibrary\>/the lua-resty-websocket library/' \
