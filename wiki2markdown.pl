@@ -63,6 +63,9 @@ sub gen_anchor {
     my $link = shift;
     $link =~ s/[^-\w_ ]//g;
     $link =~ s/ /-/g;
+    if ($link =~ /^[A-Z][a-z]+_[A-Z][a-z]+/) {
+        $link =~ s/_/-/g;
+    }
     lc($link);
 }
 
