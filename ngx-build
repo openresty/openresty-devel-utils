@@ -413,6 +413,12 @@ sub apply_patches {
         shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-hash_overflow.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    if ($ver ge '001007004') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../ngx_openresty/patches/nginx-$version-gzip_gunzip_flush.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
