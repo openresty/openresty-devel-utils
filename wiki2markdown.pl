@@ -175,7 +175,9 @@ $s =~ s!<geshi([^\n>]*)>\n*(.*?)</geshi>!
     } else {
         undef $lang;
     }
-    if ($v =~ /^ {0,3}\S/m) { $v =~ s/^/    /gm }
+    if ($v =~ /^ {0,3}\S/ms) {
+        $v =~ s/^/    /gms;
+    }
     my $out = "\n$v";
     if ($lang) {
         $out = "```$lang\n$out```";
@@ -229,7 +231,7 @@ $s =~ s! \[\[ ([^\|\]\[]*) \| ( [^\]]+ ) \]\]
 
 while ($s =~ s{^(\S[^\n]*?)?([^\(\<\n])(https?://[^\s)(\n]+)}{$1$2<$3>}gms) {}
 #$s =~ s{^\[\[(\w+)\]\]}{my $name = $1; my $link = gen_link($name); warn "!!! $name"; defined($link) ? "[$name]($link)" : "[$name](http://wiki.nginx.org/$name)"}gsme;
-while ($s =~ s{^(\S[^\n]*?)\[\[(\w+)\]\]}{
+while ($s =~ s{^(\S[^\n]*?)?\[\[(\w+|".*?")\]\]}{
     my ($prefix, $name) = ($1, $2);
     my ($link, $modname) = gen_link($name);
     if (!defined $link) {
@@ -278,7 +280,8 @@ if (!($s =~ s/^(Name\n=+\n)(.*?)(^[^\n]+\n=+\n)/$1$2Table of Contents\n=========
 
 $s =~ s{^```(\w+)\n(.*?)^```\n}{
     my ($lang, $out) = ($1, $2);
-    $out =~ s/^    //gm;
+    $out =~ s/^    / /gms;
+    $out =~ s/ +$//gms;
     "```$lang\n" . $out . "```\n"
 }gesm;
 
@@ -293,6 +296,8 @@ $s =~ s{<!--\s*inline-toc\s*-->}{
     }
     $toc
 }egms;
+
+while ($s =~ s{^(\S[^\n]*?)\[(\w+)\](?![\(`])}{$1\\[$2\\]}gms) {}
 
 print "<!---\nDon't edit this file manually! Instead you should generate it ",
     "by using:\n    wiki2markdown.pl $infile\n-->\n\n";
