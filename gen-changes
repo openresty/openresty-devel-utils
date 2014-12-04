@@ -12,7 +12,10 @@ perl twiki2pod.pl a.twiki \
     | sed 's/\<LuaRestyWebSocketLibrary\>/the lua-resty-websocket library/' \
     | sed 's/\<LuaRestyMySQLLibrary\>/the lua-resty-mysql library/' \
     | sed 's/\<LuaRestyLrucacheLibrary\>/the lua-resty-lrucache library/' \
+    | sed 's/\<LuaRestyLockLibrary\>/the lua-resty-lock library/' \
     | sed 's/\<EchoNginxModule\>/the ngx_echo module/' \
+    | sed 's/\<DrizzleNginxModule\>/the ngx_drizzle module/' \
+    | sed 's/\<CoolkitNginxModule\>/the ngx_coolkit module/' \
     | sed 's/\<SetMiscNginxModule\>/the ngx_set_misc module/' \
     | sed 's/\<PostgresNginxModule\>/the ngx_postgres module/' \
     | sed 's/\<MemcNginxModule\>/the ngx_memc module/' \
