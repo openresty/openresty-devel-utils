@@ -120,6 +120,9 @@ for my $sec (@sections) {
 
     print $out $src;
     if (++$i > 3 && $src !~ /Back to TOC/sm) {
+        if ($src !~ /\n\n$/s) {
+            print $out "\n";
+        }
         print $out "[Back to TOC](#table-of-contents)\n\n";
     }
 
