@@ -233,6 +233,9 @@ while ($s =~ s{^(\S[^\n]*?)?([^\(\<\n])(https?://[^\s)(\n]+)}{$1$2<$3>}gms) {}
 #$s =~ s{^\[\[(\w+)\]\]}{my $name = $1; my $link = gen_link($name); warn "!!! $name"; defined($link) ? "[$name]($link)" : "[$name](http://wiki.nginx.org/$name)"}gsme;
 while ($s =~ s{^(\S[^\n]*?)?\[\[(\w+|".*?")\]\]}{
     my ($prefix, $name) = ($1, $2);
+    if (!defined $prefix) {
+        $prefix = '';
+    }
     my ($link, $modname) = gen_link($name);
     if (!defined $link) {
         warn "$name";
