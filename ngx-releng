@@ -32,6 +32,7 @@ ack '^static .*?\(\);' $cfiles /dev/null
 ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
 ack '^\#\s*define\s+ngx_http_\w+?_version\s+\d+$' $cfiles /dev/null
 ack '\b(?:if|for|while)\(|\bdo\{' $cfiles /dev/null
+ack '^\s*plan\s+tests\s*=>.*?repeat_each\(\d+\)' t /dev/null
 
 perl -e 'use strict; use warnings;
     for my $fname (@ARGV) {
