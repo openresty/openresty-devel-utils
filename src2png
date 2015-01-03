@@ -6,15 +6,16 @@ if [ -z "$1" ]; then
 fi
 
 rm -f $1.html
-gvim -e $1 -c "set nobackup" \
-    -c ":colorscheme desert" \
-    -c :TOhtml \
-    -c wq -c :q \
+gvim -i NONE -X -c -e "set nobackup" \
+    -c "colorscheme desert" \
+    -c "tab sview $1" \
+    -c TOhtml \
+    -c wq -c q -c q \
     || exit 1
 
 while [ ! -f $1.html ]; do
     echo sleeping...
-    sleep 0.2
+    sleep 0.1
 done
 
 sed 's/background-color: *[^;]*/background-color: #000/g' $1.html > $1.tmp
