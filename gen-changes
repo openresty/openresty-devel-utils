@@ -2,7 +2,7 @@
 
 perl twiki2pod.pl a.twiki \
     | pod2text -u -i 1 -w 69 - \
-    | perl -e '$s = do { local $/; <> }; $s =~ s/(<http[^>]+)\n\s+([^>]+?>)/$1$2/g; $s =~ s/ ~([A-Z][0-9A-Za-z]+)\b/ $1/g; print $s' \
+    | perl -e '$s = do { local $/; <> }; $s =~ s/(<http[^>]+)\n\s+([^>]+?>)/$1$2/g; $s =~ s/ ~([A-Z][_0-9A-Za-z]+)\b/ $1/g; print $s' \
     | sed 's/\<LuaNginxModule\>/the ngx_lua module/' \
     | sed 's/\<SrcacheNginxModule\>/the ngx_srcache module/' \
     | sed 's/\<LuaRestyCoreLibrary\>/the lua-resty-core library/' \
@@ -20,5 +20,6 @@ perl twiki2pod.pl a.twiki \
     | sed 's/\<PostgresNginxModule\>/the ngx_postgres module/' \
     | sed 's/\<MemcNginxModule\>/the ngx_memc module/' \
     | sed 's/\<Redis2NginxModule\>/the ngx_redis2 module/' \
-    | sed 's/\<FormInputNginxModule\>/the ngx_form_input module/'
+    | sed 's/\<FormInputNginxModule\>/the ngx_form_input module/' \
+    | sed 's/\<RestyCLI\>/resty-cli/'
 
