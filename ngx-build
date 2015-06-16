@@ -199,6 +199,7 @@ shell("$make -j$jobs");
 shell("$make install");
 
 sub configure_nginx {
+    warn "./configure --prefix=$target @opts\n";
     system("./configure", "--prefix=$target",
         @opts) == 0 or
             die "failed to configure nginx.\n";
