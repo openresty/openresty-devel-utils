@@ -2,7 +2,7 @@
 
 perl twiki2pod.pl a.twiki \
     | pod2text -u -i 1 -w 69 - \
-    | perl -e '$s = do { local $/; <> }; $s =~ s/(<http[^>]+)\n\s+([^>]+?>)/$1$2/g; $s =~ s/ ~([A-Z][_0-9A-Za-z]+)\b/ $1/g; print $s' \
+    | perl -e '$s = do { local $/; <> }; $s =~ s/(<http[^>]+)\n\s+([^>]+?>)/$1$2/g; $s =~ s/[ \/]~([A-Z][_0-9A-Za-z]+)\b/ $1/g; print $s' \
     | sed 's/\<LuaNginxModule\>/the ngx_lua module/' \
     | sed 's/\<SrcacheNginxModule\>/the ngx_srcache module/' \
     | sed 's/\<LuaRestyCoreLibrary\>/the lua-resty-core library/' \
@@ -18,6 +18,14 @@ perl twiki2pod.pl a.twiki \
     | sed 's/\<CoolkitNginxModule\>/the ngx_coolkit module/' \
     | sed 's/\<SetMiscNginxModule\>/the ngx_set_misc module/' \
     | sed 's/\<PostgresNginxModule\>/the ngx_postgres module/' \
+    | sed 's/\<EncryptedSessionNginxModule\>/the ngx_encrypted_session module/' \
+    | sed 's/\<IconvNginxModule\>/the ngx_iconv module/' \
+    | sed 's/\<RdsCsvNginxModule\>/the ngx_rds_csv module/' \
+    | sed 's/\<RdsJsonNginxModule\>/the ngx_rds_json module/' \
+    | sed 's/\<XssNginxModule\>/the ngx_xss module/' \
+    | sed 's/\<ArrayVarNginxModule\>/the ngx_array_var module/' \
+    | sed 's/\<LuaUpstreamNginxModule\>/the ngx_lua_upstream module/' \
+    | sed 's/\<HeadersMoreNginxModule\>/the ngx_headers_more module/' \
     | sed 's/\<MemcNginxModule\>/the ngx_memc module/' \
     | sed 's/\<Redis2NginxModule\>/the ngx_redis2 module/' \
     | sed 's/\<FormInputNginxModule\>/the ngx_form_input module/' \
