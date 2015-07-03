@@ -254,7 +254,9 @@ sub apply_patches {
     unless ($ver ge '001002001') {
         shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-reset_wev_handler_in_named_locations.patch");
 
-        shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-filter_finalize_hang.patch");
+        unless ($ver lt '1009002') {
+            shell("patch -p0 < $root/../ngx_openresty/patches/nginx-$version-filter_finalize_hang.patch");
+        }
     }
 
     unless ($ver ge '001002003') {
