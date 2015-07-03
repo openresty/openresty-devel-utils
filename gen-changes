@@ -4,6 +4,7 @@ perl twiki2pod.pl a.twiki \
     | pod2text -u -i 1 -w 69 - \
     | perl -e '$s = do { local $/; <> }; $s =~ s/(<http[^>]+)\n\s+([^>]+?>)/$1$2/g; $s =~ s/[ \/]~([A-Z][_0-9A-Za-z]+)\b/ $1/g; print $s' \
     | sed 's/\<LuaNginxModule\>/the ngx_lua module/' \
+    | sed 's/\<NginxDevelKit\>/the ngx_devel_kit (NDK) module/' \
     | sed 's/\<SrcacheNginxModule\>/the ngx_srcache module/' \
     | sed 's/\<LuaRestyCoreLibrary\>/the lua-resty-core library/' \
     | sed 's/\<LuaCjsonLibrary\>/the lua-cjson library/' \
