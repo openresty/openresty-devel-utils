@@ -29,6 +29,8 @@ ack '\--- *(?:ONLY|LAST)' `find t -name '*.t'` /dev/null
 ack -l '\r\n' t /dev/null
 ack '\(\);' $hfiles /dev/null
 ack '^static .*?\(\);' $cfiles /dev/null
+ack '^static [^()]*?\*\s\w+' $cfiles /dev/null
+ack '^\w+[^()]*?\*\s\w+' $hfiles /dev/null
 ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
 ack '^\#\s*define\s+ngx_http_\w+?_version\s+\d+$' $cfiles /dev/null
 ack '\b(?:if|for|while)\(|\bdo\{' $cfiles /dev/null
