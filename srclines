@@ -25,7 +25,7 @@ for my $file (@ARGV) {
     } elsif ($ext eq 'pl' || $ext eq 'pm') {
         $src =~ s/^\s*\#.*//gm;
         $src =~ s/^\s*\n//gm;
-        $src =~ s/^=\w+//gm;
+        $src =~ s/^=\w+.*?^=cut\s*$//gms;
         $src =~ s/^__(?:DATA|END)__\n.*//gms;
 
     } elsif ($ext =~ /^(?:[ch]|cc|cpp|y|dasc)$/) {
