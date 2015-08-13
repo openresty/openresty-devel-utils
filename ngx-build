@@ -183,7 +183,8 @@ if ($force || ! -f $tarball || ! -d "nginx-$version") {
 chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
 
 if ($force || ! -f "Makefile" || -M "$root/config" < -M "Makefile"
-    || -M "$root/util/build.sh" < -M "Makefile"
+    || (-f "$root/util/build.sh"
+        && -M "$root/util/build.sh" < -M "Makefile")
     || (-f "$root/util/build2.sh"
         && -M "$root/util/build2.sh" < -M "Makefile"))
 {
