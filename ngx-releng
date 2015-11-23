@@ -24,6 +24,7 @@ ack '(?<!:)//' $cfiles /dev/null
 ack '[ \t]+$' $cfiles /dev/null
 ack '^\s*?\t\s*\S' $cfiles /dev/null
 ack '^master_on' `find t -name '*.t'` /dev/null
+ack '=== TEST \d+\s+' `find t -name '*.t'` /dev/null
 ack 'if \( |if \(! |if \(.*? \)' $cfiles /dev/null
 ack '\--- *(?:ONLY|LAST)' `find t -name '*.t'` /dev/null
 ack -l '\r\n' t /dev/null
@@ -32,7 +33,7 @@ ack '^static .*?\(\);' $cfiles /dev/null
 ack '^static [^()]*?\*\s\w+' $cfiles /dev/null
 ack '^\w+[^()]*?\*\s\w+' $hfiles /dev/null
 ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
-ack '^\#\s*define\s+ngx_http_\w+?_version\s+\d+$' $cfiles /dev/null
+ack '^\#\s*define\s+ngx_[a-z]+_\w+?_version\s+\d+$' $cfiles /dev/null
 ack '\b(?:if|for|while)\(|\bdo\{' $cfiles /dev/null
 ack '^\s*plan\s+tests\s*=>.*?repeat_each\(\d+\)' t /dev/null
 

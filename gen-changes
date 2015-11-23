@@ -8,12 +8,15 @@ perl twiki2pod.pl a.twiki \
     | sed 's/\<SrcacheNginxModule\>/the ngx_srcache module/' \
     | sed 's/\<LuaRestyCoreLibrary\>/the lua-resty-core library/' \
     | sed 's/\<LuaCjsonLibrary\>/the lua-cjson library/' \
+    | sed 's/\<LuaRdsParserLibrary\>/the lua-rds-parser library/' \
+    | sed 's/\<LuaRedisParserLibrary\>/the lua-redis-parser library/' \
     | sed 's/\<LuaRestyUpstreamHealthcheckLibrary\>/the lua-resty-upstream-healthcheck library/' \
     | sed 's/\<LuaRestyDNSLibrary\>/the lua-resty-dns library/' \
     | sed 's/\<LuaRestyWebSocketLibrary\>/the lua-resty-websocket library/' \
     | sed 's/\<LuaRestyMySQLLibrary\>/the lua-resty-mysql library/' \
     | sed 's/\<LuaRestyLrucacheLibrary\>/the lua-resty-lrucache library/' \
     | sed 's/\<LuaRestyLockLibrary\>/the lua-resty-lock library/' \
+    | sed 's/\<LuaRestyRedisLibrary\>/the lua-resty-redis library/' \
     | sed 's/\<EchoNginxModule\>/the ngx_echo module/' \
     | sed 's/\<DrizzleNginxModule\>/the ngx_drizzle module/' \
     | sed 's/\<CoolkitNginxModule\>/the ngx_coolkit module/' \

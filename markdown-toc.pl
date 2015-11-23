@@ -107,7 +107,7 @@ while (1) {
 
 my $outfile = "$infile.new";
 open my $out, ">$outfile"
-    or die "Cannot open $infile for writing: $!\n";
+    or die "Cannot open $outfile for writing: $!\n";
 
 my $i = 0;
 print $out $preamble;
@@ -120,10 +120,12 @@ for my $sec (@sections) {
 
     print $out $src;
     if (++$i > 3 && $src !~ /Back to TOC/sm) {
-        if ($src !~ /\n\n$/s) {
-            print $out "\n";
+        if ($src =~ /\w\n.*?\n.*?\w/s) {
+            if ($src !~ /\n\n$/s) {
+                print $out "\n";
+            }
+            print $out "[Back to TOC](#table-of-contents)\n\n";
         }
-        print $out "[Back to TOC](#table-of-contents)\n\n";
     }
 
     if ($title =~ /^Name$/i) {
