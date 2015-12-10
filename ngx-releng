@@ -196,5 +196,7 @@ perl -e 'use strict; use warnings;
     }
 ' $cfiles
 
+ngx-style.pl $cfiles
+
 echo done.
 
