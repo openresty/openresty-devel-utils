@@ -5,21 +5,33 @@ use warnings;
 
 package Openresty::Devel::Build;
 
-__PACKAGE__->main() unless caller();
-
 use Cwd ();
 use File::Spec ();
-use Getopt::Long;
+use Getopt::Long qw(GetOptionsFromArray);
 use Data::Dumper;
 use Pod::Usage;
-# use Pod::Find qw(pod_where);
-use base 'Exporter';
 
-our @EXPORT_OK = qw( main );
+require Exporter;
 
-# Configure getopt
-my $op = Getopt::Long::Parser->new;
-$op->configure("pass_through");
+our @ISA = qw(Exporter);
+our @EXPORT = qw( main );
+our $VERSION = 1.00;
+
+our $opts = {
+  force => '',
+  build_opts => {
+    cc                => '',
+    optimize          => '',
+    jobs              => '',
+    disable_no_pool   => 0,
+    no_debug          => '',
+    dtrace            => '',
+    cc_opts           => '',
+    ld_opts           => '',
+    extra_config_opts => ''
+  },
+  unknown => []
+};
 
 my $cc = $ENV{NGX_BUILD_CC};
 my $optimize = $ENV{NGX_BUILD_OPT};
@@ -32,30 +44,39 @@ my $ld_opts = $ENV{NGX_BUILD_LD_OPTS};
 my $extra_config_opts = $ENV{NGX_BUILD_EXTRA_CONFIG_OPTS};
 
 sub main {
-  my $class = shift;
-  $class->parse_options();
+  my $cls = shift;
+  my $ARGS = defined $_[0] ? $_[0] : [];
+
+  $cls->parse_options($ARGS);
+  print Dumper \$opts;
 }
 
 sub parse_options {
-  my $class = shift;
+  my ($cls, $ARGS) = @_;
 
-  my $help;
-  GetOptions(
-    'h|help' => \$help
-  ) or $class->usage(2);
-
-  $class->usage(1) if $help;
+  Getopt::Long::Configure( 'pass_through', 'no_autoabbrev');
+  my $ret = Getopt::Long::GetOptionsFromArray($ARGS,
+    'f|force=s' => \$opts->{force},
+    'cc=s'      => \$opts->{build_opts}{cc},
+    'o|optimize=i' => \$opts->{build_opts}{optimize},
+    'disable-no-pool' => \$opts->{build_opts}{disable_no_pool},
+    'h|help'    => sub { $cls->usage(1)               },
+    '<>'        => sub { push($opts->{unknown}, $_[0]); }
+  );
 }
 
 sub usage {
-  my $exit_status = shift || 2;
+  my $cls = shift;
+  my $ret = defined $_[0] ? $_[0] : 2;
 
   pod2usage({
-    -exitval => $exit_status
+    -exitval => $ret
   });
 }
 
 1;
+
+__PACKAGE__->main(\@ARGV) unless caller();
 
 __END__
 
