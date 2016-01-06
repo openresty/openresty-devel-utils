@@ -1,0 +1,102 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+package Openresty::Devel::Build;
+
+__PACKAGE__->main() unless caller();
+
+use Cwd ();
+use File::Spec ();
+use Getopt::Long;
+use Data::Dumper;
+use Pod::Usage;
+# use Pod::Find qw(pod_where);
+use base 'Exporter';
+
+our @EXPORT_OK = qw( main );
+
+# Configure getopt
+my $op = Getopt::Long::Parser->new;
+$op->configure("pass_through");
+
+my $cc = $ENV{NGX_BUILD_CC};
+my $optimize = $ENV{NGX_BUILD_OPT};
+my $jobs = $ENV{NGX_BUILD_JOBS} || 1;
+my $disable_no_pool = $ENV{NGX_BUILD_DISABLE_NO_POOL};
+my $no_debug = $ENV{NGX_BUILD_NO_DEBUG};
+my $dtrace = $ENV{NGX_BUILD_DTRACE};
+my $cc_opts = $ENV{NGX_BUILD_CC_OPTS};
+my $ld_opts = $ENV{NGX_BUILD_LD_OPTS};
+my $extra_config_opts = $ENV{NGX_BUILD_EXTRA_CONFIG_OPTS};
+
+sub main {
+  my $class = shift;
+  $class->parse_options();
+}
+
+sub parse_options {
+  my $class = shift;
+
+  my $help;
+  GetOptions(
+    'h|help' => \$help
+  ) or $class->usage(2);
+
+  $class->usage(1) if $help;
+}
+
+sub usage {
+  my $exit_status = shift || 2;
+
+  pod2usage({
+    -exitval => $exit_status
+  });
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+resty-build - build a custom nginx
+
+=head1 SYNOPSIS
+
+./resty-build [OPTS]
+
+=head1 OPTIONS
+
+=over 4
+
+=item --version
+
+Print the version information
+
+=item --usage
+
+Print the usage line of this summary
+
+=item --help
+
+Print this summary
+
+=item --add-module
+
+Add a module
+
+=item --debug
+
+Enable the NGINX debug flag
+
+=back
+
+=head1 DESCRIPTION
+
+A utility for creating custom nginx builds.
+
+=head1 AUTHOR
+
+Brandon Beveridge
