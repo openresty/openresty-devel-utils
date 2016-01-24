@@ -33,6 +33,9 @@ for my $file (@ARGV) {
     # macro flags
     my ($macro_defined) = (0);
 
+    # variable align flags
+    my ($need_variable_align, $variable_align_space) = (0, 0, 0);
+
     while (<$in>) {
         $line = $_;
 
@@ -57,6 +60,12 @@ for my $file (@ARGV) {
             if (length($1) != 2) {
                 output "need two space before $2";
             }
+        }
+
+        # function close or struct close
+        if ($need_variable_align == 1 && $line =~ /^}/) {
+            $need_variable_align = 0;
+            $variable_align_space = 0;
         }
 
         # one line comment
@@ -140,6 +149,7 @@ for my $file (@ARGV) {
             }
         }
 
+        # not full_comment
         if ($full_comment == 0) {
 
             # check the front space
@@ -179,6 +189,7 @@ for my $file (@ARGV) {
                 if ($space % 4 != 0) {
                     #output "warning: wrong front space?";
                 }
+
             }
 
             # enter next level state
@@ -199,6 +210,23 @@ for my $file (@ARGV) {
             if ($unclosed_brackets == 1) {
                 if ($line_without_brackets =~ /\)([^)]*$)/g) {
                     $unclosed_brackets = 0;
+                }
+            }
+        }
+
+        if ($need_variable_align == 1) {
+            # struct skip empty line; but function break on empty line
+            if ($line eq "\n" || $full_comment == 1) {
+                $variable_align_space = 0;
+            } else {
+                if ($line =~ /(^\s+\w+(\s\w+)?\s+\**)\w+(,|;| =)/) {
+                    if ($variable_align_space > 0 && $variable_align_space != length($1)) {
+                        output "variable name should align with the previous line";
+                    }
+                    $variable_align_space = length($1);
+                } else {
+                    $need_variable_align = 0;
+                    $variable_align_space = 0;
                 }
             }
         }
@@ -232,6 +260,12 @@ for my $file (@ARGV) {
             $one_line_comment = 0;
             $half_line_comment = 0;
         }
+
+        # function open or struct open
+        if ($line =~ /^{$/ || $line =~ /struct \w+ {$/) {
+            $need_variable_align = 1;
+            $variable_align_space = 0;
+        }
     }
 }
 
@@ -244,6 +278,11 @@ sub replace_quotes ($) {
 
 sub output ($) {
     my ($str) = @_;
+
+    # skip *_lua_lex.c
+    if ($infile =~ /_lua_lex.c$/) {
+        return;
+    }
 
     if (!exists($files{$infile})) {
         print "\n$infile:\n";
