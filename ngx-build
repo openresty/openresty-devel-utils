@@ -238,7 +238,9 @@ sub apply_patches {
     }
 
     warn "applying the upstream_pipelining patch...\n";
-    shell("patch -p0 < $root/../openresty/patches/nginx-$version-upstream_pipelining.patch");
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    shell("patch -p1 < $root/../openresty/patches/nginx-$version-upstream_pipelining.patch");
+    chdir "..";
 
     unless ($disable_no_pool) {
         warn "applying no-pool patch...\n";
