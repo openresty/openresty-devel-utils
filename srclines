@@ -22,7 +22,7 @@ for my $file (@ARGV) {
         $src =~ s/^\s*--.*//gm;
         $src =~ s/^\s*\n//gm;
 
-    } elsif ($ext eq 'pl' || $ext eq 'pm') {
+    } elsif ($ext eq 'pl' || $ext eq 'pm' || $ext eq 'edge') {
         $src =~ s/^\s*\#.*//gm;
         $src =~ s/^\s*\n//gm;
         $src =~ s/^=\w+.*?^=cut\s*$//gms;
@@ -46,4 +46,3 @@ for my $file (@ARGV) {
 
     print $src;
 }
-
