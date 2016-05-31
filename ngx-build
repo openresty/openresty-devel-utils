@@ -225,8 +225,15 @@ sub apply_patches {
 
     unless ($ver ge '001005012') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        warn "applying patch for the latest SPDY security vulnerability (CVE-2014-0133)";
+        warn "applying patch for the SPDY security vulnerability (CVE-2014-0133)";
         shell("patch -p0 -l < $root/../openresty/patches/patch.2014.spdy2.txt");
+        chdir "..";
+    }
+
+    unless ($ver ge '001010001') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        warn "applying patch for the security vulnerability (CVE-2016-4450)";
+        shell("patch -p0 -l < $root/../openresty/patches/patch.2016.write.txt");
         chdir "..";
     }
 
