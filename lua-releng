@@ -17,7 +17,7 @@ my $no_long_line_check = $opts{L};
 my $check_lua_ver = "luac -v | awk '{print\$2}'| grep 5.1";
 my $output = `$check_lua_ver`;
 if ($output eq '') {
-    die "ERROR: lua-releng ONLY support Lua 5.1!\n";
+    die "ERROR: lua-releng ONLY supports Lua 5.1!\n";
 }
 
 if ($#ARGV != -1) {
