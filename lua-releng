@@ -95,7 +95,7 @@ sub process_file {
 
     p("Checking use of Lua global variables in file $file...");
     p("\top no.\tline\tinstruction\targs\t; code");
-    blank("luac -p -l $file | grep -E '[GS]ETGLOBAL' | grep -vE '\\<(require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math|pcall|xpcall|unpack|pairs|ipairs|assert|module|package|coroutine|[gs]etfenv|next|rawget|rawset|rawlen)\\>'");
+    blank("luac -p -l $file | grep -E '[GS]ETGLOBAL' | grep -vE '\\<(require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math|pcall|xpcall|unpack|pairs|ipairs|assert|module|package|coroutine|[gs]etfenv|next|rawget|rawset|rawlen|select)\\>'");
     unless ($no_long_line_check) {
         p("Checking line length exceeding 80...");
         blank("grep -H -n -E --color '.{81}' $file");
