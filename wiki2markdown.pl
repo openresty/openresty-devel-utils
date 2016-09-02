@@ -184,7 +184,11 @@ $s =~ s!<geshi([^\n>]*)>\n*(.*?)</geshi>!
     }
     $out;
     !gmse;
-$s =~ s{^https?://[^\s)(]+}{<$&>}gms;
+$s =~ s{^(https?://[^\s\)\(]+)}{
+            my $link = $1; my $punc = '';
+            if ($link =~ m/[,.;:]$/) { $punc = chop $link; }
+            "<$link>$punc"
+        }gmse;
 $s =~ s/^'''([^\n]*?)'''/(my $v = $1) =~ s{<}{\&lt;}g; $v =~ s{>}{\&gt;}g; "**$v**"/egms;
 while ($s =~ s/^(\S[^\n]*?)'''([^\n]*?)'''/my ($p, $v) = ($1, $2); $v =~ s{<}{\&lt;}g; $v =~ s{>}{\&gt;}g; $v =~ s{\*}{\&#42;}g; "$p**$v**"/egms) {}
 $s =~ s/^''([^\n]*?)''/my $v = $1; $v =~ s{<}{\&lt;}g; $v =~ s{>}{\&gt;}g; "*$v*"/egms;
@@ -229,7 +233,10 @@ $s =~ s! \[\[ ([^\|\]\[]*) \| ( [^\]]+ ) \]\]
         }
     !gmsxe;
 
-while ($s =~ s{^(\S[^\n]*?)?([^\(\<\n])(https?://[^\s)(\n]+)}{$1$2<$3>}gms) {}
+while ($s =~ s{^(\S[^\n]*?)?([^\(\<\n])(https?://[^\s)(\n]+)}{
+        my $prefix = "$1$2"; my $link = $3; my $punc = '';
+        if ($link =~ /[,.;:]$/) { $punc = chop $link } "$prefix<$link>$punc"
+    }egms) {}
 #$s =~ s{^\[\[(\w+)\]\]}{my $name = $1; my $link = gen_link($name); warn "!!! $name"; defined($link) ? "[$name]($link)" : "[$name](http://wiki.nginx.org/$name)"}gsme;
 while ($s =~ s{^(\S[^\n]*?)?\[\[(\w+|".*?")\]\]}{
     my ($prefix, $name) = ($1, $2);
