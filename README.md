@@ -1,7 +1,7 @@
 NAME
 ====
 
-nginx-devel-utils - Development utilities for NGINX and OpenResty
+openresty-devel-utils - Development utilities for NGINX and OpenResty
 
 Table of Contents
 =================
