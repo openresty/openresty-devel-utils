@@ -69,12 +69,19 @@ if (defined $ver) {
     $title .= "&nbsp; v$ver";
 }
 
+my $node_shape;
+if ($trim) {
+    $node_shape = "ellipse";
+} else {
+    $node_shape = "box";
+}
+
 print <<_EOC_;
 digraph grammar_spec {
     graph [fontname="helvetica"];
     labelloc="t";
     label=<$title>;
-    node [shape=box, fontname="helvetica"];
+    node [shape=$node_shape, fontname="helvetica"];
     edge [color=red, fontname="helvetica"];
 
 _EOC_
