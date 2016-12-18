@@ -3,6 +3,13 @@
 use v5.10.1;
 use strict;
 use warnings;
+use Getopt::Std qw( getopts );
+
+my %opts;
+getopts("t", \%opts)
+    or die "usage: $0 [-t] <infile>\n";
+
+my $trim = $opts{t};
 
 my $infile = shift or die "no input file specified.\n";
 
@@ -77,22 +84,30 @@ my %rule_ids;
 for my $rule (@rules) {
     my ($name, $def) = @$rule;
 
-    my $label = $def;
-    if ($label !~ /\n.*?\n/s) {
-        $label =~ s/\s* : \s*/:\n  /xgs;
-    }
-
     my $id = gen_id($name);
     $rule_ids{$id} = 1;
 
-    $label =~ s/\&/\&amp;/g;
-    $label =~ s/  /\&nbsp; /g;
-    $label =~ s/</\&lt;/g;
-    $label =~ s/>/\&gt;/g;
-    $label =~ s/"/\&quot;/g;
-    $label =~ s/\A \s+ //;
-    $label =~ s{^ ([a-z][-\w]*) :}{<b>$1</b>&nbsp;:}x;
-    $label =~ s{\n}{<br align="left"/>}g;
+    my $label;
+    if ($trim) {
+        $label = "<b>$name</b>";
+
+    } else {
+
+        $label = $def;
+        if ($label !~ /\n.*?\n/s) {
+            $label =~ s/\s* : \s*/:\n  /xgs;
+        }
+
+        $label =~ s/\&/\&amp;/g;
+        $label =~ s/  /\&nbsp; /g;
+        $label =~ s/</\&lt;/g;
+        $label =~ s/>/\&gt;/g;
+        $label =~ s/"/\&quot;/g;
+        $label =~ s/\A \s+ //;
+        $label =~ s{^ ([a-z][-\w]*) :}{<b>$1</b>&nbsp;:}x;
+        $label =~ s{\n}{<br align="left"/>}g;
+    }
+
     say "    $id [label=<$label>];"
 }
 
