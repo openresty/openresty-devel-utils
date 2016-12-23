@@ -5,16 +5,28 @@ use warnings;
 
 for my $file (@ARGV) {
     my ($ext) = ($file =~ /\.(\w+)$/);
-    if (!$ext) {
-        die "no extension found for file name $file";
+    if ($ext) {
+        $ext = lc($ext);
     }
-
-    $ext = lc($ext);
 
     open my $in, $file or
         die "Cannot open $file for reading: $!\n";
 
     my $src = do { local $/; <$in> };
+
+    if (!$ext) {
+        if ($src =~ /\A\#!(.*)/) {
+            my $shebang = $1;
+            if ($shebang =~ /\b(?:sh|bash)\b/) {
+                $ext = 'sh';
+            } elsif ($shebang =~ /\b(?:perl)\b/) {
+                $ext = 'pl';
+            }
+
+        } else {
+            die "no file extension nor shebang line found in file $file\n";
+        }
+    }
 
     close $in;
 
@@ -22,7 +34,7 @@ for my $file (@ARGV) {
         $src =~ s/^\s*--.*//gm;
         $src =~ s/^\s*\n//gm;
 
-    } elsif ($ext eq 'pl' || $ext eq 'pm' || $ext eq 'edge') {
+    } elsif ($ext eq 'pl' || $ext eq 'pm' || $ext eq 'edge' || $ext eq 'sh' || $ext eq 'pgx') {
         $src =~ s/^\s*\#.*//gm;
         $src =~ s/^\s*\n//gm;
         $src =~ s/^=\w+.*?^=cut\s*$//gms;
@@ -41,7 +53,9 @@ for my $file (@ARGV) {
         $src =~ s/^\s*\n//gm;
 
     } else {
-        die "unknown extension: $ext\n";
+        $src =~ s/^\s*\#\s.*//gm;
+        $src =~ s/^\s*\n//gm;
+        warn "WARNING: unknown recognized extension: $ext\n";
     }
 
     print $src;
