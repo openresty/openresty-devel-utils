@@ -48,7 +48,7 @@ for my $file (@ARGV) {
         }
 
         if ($line =~ /(\s+)[\r]?\n$/) {
-            output "found unnecessary tail space";
+            output "found line tailing spaces";
         }
 
         # force point convert
