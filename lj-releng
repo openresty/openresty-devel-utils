@@ -8,16 +8,16 @@ use Getopt::Std;
 my (@luas, @tests);
 
 my %opts;
-getopts('Lse', \%opts) or die "Usage: lua-releng [-L] [-s] [-e] [files]\n";
+getopts('Lse', \%opts) or die "Usage: lj-releng [-L] [-s] [-e] [files]\n";
 
 my $silent = $opts{s};
 my $stop_on_error = $opts{e};
 my $no_long_line_check = $opts{L};
 
-my $check_lua_ver = "luac -v | awk '{print\$2}'| grep 5.1";
+my $check_lua_ver = "luajit -v | awk '{print\$2}'| grep 2.1";
 my $output = `$check_lua_ver`;
 if ($output eq '') {
-    die "ERROR: lua-releng ONLY supports Lua 5.1!\n";
+    die "ERROR: lj-releng ONLY supports LuaJIT 2.1!\n";
 }
 
 if ($#ARGV != -1) {
@@ -95,7 +95,7 @@ sub process_file {
 
     p("Checking use of Lua global variables in file $file...");
     p("op no. line     opcode  args        ; code");
-    blank("luajit -bL $file | grep -E 'G[GS]ET' | grep -vE '\\<(require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math|pcall|xpcall|unpack|pairs|ipairs|assert|module|package|coroutine|[gs]etfenv|next|rawget|rawset|rawlen|select)\\>'");
+    blank("luajit -bL $file | grep -E 'G[GS]ET' | grep -vE '\\<(require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math|pcall|xpcall|unpack|pairs|ipairs|assert|module|package|coroutine|[gs]etfenv|next|rawget|rawset|rawlen|select|arg)\\>'");
     unless ($no_long_line_check) {
         p("Checking line length exceeding 80...");
         blank("grep -H -n -E --color '.{81}' $file");
