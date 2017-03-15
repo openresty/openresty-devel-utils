@@ -54,6 +54,11 @@ while (<$in>) {
         next;
     }
 
+    if (/^ \s* unit \s+ grammar \s+ \w[-\w]* (?: :: \w[-\w]*)* \s* ; \s* $/xsmi) {
+        # ignore the unit grammar declaration in fanlang grammar module files.
+        next;
+    }
+
     die "unexpected line: $_";
 }
 
