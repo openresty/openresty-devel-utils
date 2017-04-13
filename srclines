@@ -34,7 +34,7 @@ for my $file (@ARGV) {
         $src =~ s/^\s*--.*//gm;
         $src =~ s/^\s*\n//gm;
 
-    } elsif ($ext =~ /^p[l6]$/ || $ext =~ /^pm6?$/ || $ext eq 'edge' || $ext eq 'sh' || $ext eq 'pgx') {
+    } elsif ($ext =~ /^p[l6]$/ || $ext eq 'fan' || $ext =~ /^pm6?$/ || $ext eq 'edge' || $ext eq 'sh' || $ext eq 'pgx') {
         $src =~ s/\#\`\(.*?\)//gms;
         $src =~ s/^\s*\#.*//gm;
         $src =~ s/^\s*\n//gm;
