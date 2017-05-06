@@ -459,6 +459,12 @@ sub apply_patches {
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     shell("patch -p1 < $root/../openresty/patches/nginx-$version-upstream_timeout_fields.patch");
     chdir ".." or die "cannot switch to ..\n";
+
+    if ($ver ge '001011002') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
