@@ -495,6 +495,12 @@ sub apply_patches {
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-balancer_status_code.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    unless ($ver ge '001013003') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p0 < $root/../openresty/patches/patch.2017.ranges.txt");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
