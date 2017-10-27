@@ -1,0 +1,354 @@
+#!/usr/bin/env perl
+
+use v5.10.1;
+use strict;
+use warnings;
+
+use File::Spec ();
+use List::Util qw( min );
+
+sub parse_blocks ($);
+sub check_blocks ($$);
+sub shell ($);
+
+my @lua_resty_repos = qw(
+    limit-traffic
+    lock
+    logger-socket
+    lrucache
+    memcached
+    mysql
+    redis
+    string
+    upload
+    upstream-healthcheck
+    core
+    dns
+    websocket
+);
+
+my @ngx_repos = qw(
+    array_var
+    drizzle
+    echo
+    encrypted_session
+    eval
+    form_input
+    headers_more
+    iconv
+    lua
+    lua_upstream
+    memc
+    postgres
+    rds_csv
+    rds_json
+    redis2
+    replace_filter
+    set_misc
+    srcache
+    stream_lua
+    xss
+);
+
+my @repos;
+
+my $home = $ENV{HOME};
+my $root_dir = File::Spec->catfile($home, 'git');
+
+my $cmd = shift or die "No command specified";
+#warn "all CLI args: @ARGV";
+
+my ($commit_msg, $real_action, $new_supp_file);
+if ($cmd eq 'commit') {
+    $commit_msg = shift or die "No commit message specified";
+    $real_action = shift;
+
+} elsif ($cmd eq 'push') {
+    $real_action = shift;
+
+} elsif ($cmd eq 'add') {
+    $new_supp_file = shift or die "No new supppresions file specified";
+    $new_supp_file = File::Spec->rel2abs($new_supp_file);
+    $real_action = shift;
+}
+
+chdir $root_dir or die "cannot chdir to $root_dir: $!";
+
+for my $r (@lua_resty_repos) {
+    my $name = "lua-resty-$r";
+    if (!-d $name) {
+        die "repository directory $name not found";
+    }
+    push @repos, $name;
+}
+
+for my $r (@ngx_repos) {
+    my $name = "ngx_$r";
+    if (!-d $name) {
+        $r =~ s/_/-/g;
+        my $n = "$r-nginx-module";
+        if (!-d $n) {
+            die "repository directory $name or $n not found";
+        }
+        $name = $n;
+    }
+    #warn "pushing $name ...";
+    push @repos, $name;
+}
+
+for my $repo (@repos) {
+    my $d = File::Spec->catfile($root_dir, $repo);
+    chdir $d or die "cannot chdir to $d: $!";
+    my $f = File::Spec->catfile($d, 'valgrind.suppress');
+
+    #warn $d;
+
+    my $blocks = parse_blocks $f;
+
+    if ($cmd eq 'check') {
+        check_blocks $f, $blocks;
+        next;
+    }
+
+    if ($cmd eq 'fix') {
+        my $new_blocks = check_blocks $f, $blocks;
+        next unless $new_blocks;
+
+        warn "patching $f ...";
+
+        open my $out, ">$f"
+            or die "Cannot open $f for reading: $!";
+        for my $block (@$new_blocks) {
+            say $out "{";
+            for my $fr (@$block) {
+                say $out "   $fr";
+            }
+            say $out "}";
+        }
+        close $out;
+        next;
+    }
+
+    if ($cmd eq 'reset') {
+        my $cmd = "git --no-pager status --short valgrind.suppress";
+        my $out = `$cmd`;
+        if ($? != 0) {
+            die "$d: failed to run command \"$cmd\": $!";
+        }
+        #print $out;
+        if ($out =~ /^ \s* M \s+ valgrind\.suppress $ /mx) {
+            say $f;
+            shell "git checkout HEAD -- valgrind.suppress";
+        }
+    }
+
+    if ($cmd eq 'diff') {
+        my $cmd = "git --no-pager status --short valgrind.suppress";
+        my $out = `$cmd`;
+        if ($? != 0) {
+            die "$d: failed to run command \"$cmd\": $!";
+        }
+        #print $out;
+        if ($out =~ /^ \s* M \s+ valgrind\.suppress $ /mx) {
+            print "$f:\n$out";
+            shell "git --no-pager diff HEAD -- valgrind.suppress";
+        }
+        next;
+    }
+
+    if ($cmd eq 'commit') {
+        my $msg = $commit_msg;
+        my $real = $real_action;
+        my $opt = '';
+        unless ($real) {
+            $opt = ' --dry-run';
+        }
+        shell "git pull";
+        my $out = `git --no-pager status --short valgrind.suppress`;
+        if ($out =~ /^ \s* M \s+ valgrind\.suppress $ /mx) {
+            #print "$f:\n$out";
+            shell "git add valgrind.suppress";
+            shell "git commit -m '$msg'$opt -- valgrind.suppress";
+        }
+        next;
+    }
+
+    if ($cmd eq 'show') {
+        if (`git --no-pager show` =~ /valgrind\.suppress/) {
+            say $f;
+            shell "git --no-pager show";
+        }
+        next;
+    }
+
+    if ($cmd eq 'push') {
+        my $out = `git --no-pager show`;
+        if ($out =~ /\bvalgrind\.suppress\b/mx) {
+            my $real = $real_action;
+            if ($real) {
+                shell "git push";
+            } else {
+                shell "git push --dry-run";
+            }
+        }
+        next;
+    }
+
+    if ($cmd eq 'add') {
+        my $new_blocks = parse_blocks $new_supp_file;
+        if (!@$new_blocks) {
+            die "No suppression rules found in $new_supp_file";
+        }
+        my @to_add;
+        for my $b1 (@$new_blocks) {
+            my $found_dup;
+            for my $b2 (@$blocks) {
+                next if @$b2 > @$b1;
+                # check if b2 is a prefix of b1:
+                my $n = min scalar(@$b1), scalar(@$b2);
+                my $found_diff;
+                for (my $i = 0; $i < $n; $i++) {
+                    my $fr1 = $b1->[$i];
+                    my $fr2 = $b2->[$i];
+                    if ($fr1 ne $b2->[$i]) {
+                        $found_diff = 1;
+                        last;
+                    }
+                }
+                if (!$found_diff) {
+                    $found_dup = 1;
+                    #warn "$d: Found duplicate suppression rule for @$b1:\n\t@$b2";
+                    last;
+                }
+            }
+            if (!$found_dup) {
+                push @to_add, $b1;
+            }
+        }
+
+        next unless @to_add;
+
+        warn "$f: adding ", scalar @to_add, " suppression rule(s)...";
+
+        if ($real_action) {
+            open my $out, ">>$f"
+                or die "Cannot open $f for reading: $!";
+            for my $block (@to_add) {
+                say $out "{";
+                for my $fr (@$block) {
+                    say $out "   $fr";
+                }
+                say $out "}";
+            }
+            close $out;
+        }
+
+        next;
+    }
+}
+
+#my $infile = shift;
+#if ($infile) {
+#open my $in, $infile
+#or die "Cannot open $infile for reading: $!";
+#}
+
+sub parse_blocks ($) {
+    my $file = shift;
+
+    open my $in, "<", $file
+        or die "Cannot open suppression file $file for reading: $!";
+
+    my $found_open;
+    my @blocks;
+    my $frames;
+    while (<$in>) {
+        next if /^\s*$/;
+        next if /^\s*\#/;
+
+        chomp;
+
+        s/^\s+|\s+\n?$//g;
+
+        if (!$found_open) {
+            if (/^\s*\{\s*$/) {
+                $found_open = 1;
+                $frames = [];
+                next;
+            }
+
+            die "syntax error: $file:$.: expecting a \"{\" line but got $_";
+        }
+
+        # already opened
+
+        if (/^\s*\{\s*$/) {
+            die "syntax error: $file:$.: previous block not closed yet";
+        }
+
+        #warn "got: $_";
+
+        if (/^ \s* \} \s* $/x) {
+            #warn "closing...";
+            undef $found_open;
+            push @blocks, $frames;
+            undef $frames;
+            next;
+        }
+
+        if (/^ \s* < .*? > \s* $/x) {
+            push @$frames, $_;
+            next;
+        }
+
+        if (/^ \s* (?: [-a-z]+: \s* \w+
+                | Memcheck:\w+
+                | fun:\w+
+                | \w+ (?: \. \w+ )* \( .*? \)
+                | \w+ (?: [-.] \w+)*
+                | obj:\s*\* ) \s*
+            $/x)
+        {
+            push @$frames, $_;
+            next;
+        }
+
+        die "syntax error: $file:$.: $_";
+    }
+
+    return \@blocks;
+}
+
+sub check_blocks ($$) {
+    my ($f, $blocks) = @_;
+    my @new_blocks;
+    my $changes = 0;
+    for my $block (@$blocks) {
+        my $n = @$block;
+        if ($block->[1] =~ /^(?:Memcheck:(?:Addr4|Cond)|exp-sgcheck:SorG)$/ && $block->[2] eq 'fun:lj_str_new') {
+            $changes++;
+            warn "$f: error: found bad luajit false positive: @$block";
+            next;
+        }
+        if ($block->[-1] =~ /^fun:ngx_(?:p[cn]?alloc|palloc_large|create_pool|[cm]?alloc|ngx_pool_cleanup_add)$/
+            && $block->[1] =~ /Memcheck:Leak/)
+        {
+            $changes++;
+            warn "$f: error: found bad nginx allocator suppression: @$block";
+            next;
+        }
+        push @new_blocks, $block;
+        #if ($block->[-1] =~ /^fun:epoll_ctl$/) {
+        #warn "$f: error: found bad epoll syscall suppression: @$block";
+        #}
+    }
+
+    return $changes? \@new_blocks : undef;
+}
+
+sub shell ($) {
+    my $cmd = shift;
+    say "$cmd";
+    system($cmd) == 0
+        or die "failed to run shell command \"$cmd\": $!";
+}
