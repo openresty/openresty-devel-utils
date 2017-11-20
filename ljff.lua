@@ -1,8 +1,10 @@
 local vmdef = require "jit.vmdef"
-local ffid = arg[1]
-if not ffid then
+if #arg == 0 then
     print("No argument specified.")
     return
 end
-print("FastFunc " .. vmdef.ffnames[tonumber(ffid)])
 
+for i = 1, #arg do
+    local ffid = arg[i]
+    print("FastFunc " .. vmdef.ffnames[tonumber(ffid)])
+end
