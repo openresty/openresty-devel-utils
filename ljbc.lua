@@ -1,9 +1,11 @@
 local vmdef = require "jit.vmdef"
-local op = arg[1]
-if not op then
+if #arg == 0 then
     print("No argument specified.")
     return
 end
-print("opcode " .. op .. ":")
-print(string.sub(vmdef.bcnames, op*6+1, op*6+6))
 
+for i = 1, #arg do
+    local op = arg[i]
+    print("opcode " .. op .. ":")
+    print(string.sub(vmdef.bcnames, op*6+1, op*6+6))
+end
