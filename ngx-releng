@@ -18,6 +18,7 @@ echo =======================================
 cfiles=`find src -name 'ngx_*.[ch]'`
 hfiles=`find src -name 'ngx_*.h'`
 
+#ack '/\*  +' src /dev/null && exit 1
 ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null && exit 1
 ack '.{81}' $cfiles /dev/null
 ack '(?<!:)//' $cfiles /dev/null
@@ -34,7 +35,8 @@ ack '^static [^()]*?\*\s\w+' $cfiles /dev/null
 ack '^\w+[^()]*?\*\s\w+' $hfiles /dev/null
 ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
 ack '^\#\s*define\s+ngx_[a-z]+_\w+?_version\s+\d+$' $cfiles /dev/null
-ack '\b(?:if|for|while)\(|\bdo\{' $cfiles /dev/null
+ack '\b(?:if|for|while|switch)\(|\bdo\{' $cfiles /dev/null
+ack '^\s*if\s*\([^()]+\)\s*$' $cfiles /dev/null
 ack '^\s*plan\s+tests\s*=>.*?repeat_each\(\d+\)' t /dev/null
 
 perl -e 'use strict; use warnings;
