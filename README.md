@@ -91,9 +91,9 @@ export NGX_BUILD_JOBS=9
 exec ./util/build.sh 1.13.6
 ```
 
-The `ngx-build` script will downlaods the specified verison of the nginx source release tarball from
+The `ngx-build` script will download the specified version of the nginx source release tarball from
 nginx.org and caches it under `~/work/` in the local file system, and then build everything under
-`./buildroot/nginx-1.13.6/` and finally, if everythings builds ok, it will installs the nginx into
+`./buildroot/nginx-1.13.6/` and finally, if everything builds fine, it will installs the nginx into
 `./work/nginx/`.
 
 The `build13` shell script above assumes that you have installed the `openresty-debug`, `openresty-pcre-devel`,
@@ -106,7 +106,7 @@ The `build13` script should never get checked into the git repository. And it sh
 everyday development.
 
 Only those system environments whose names start with the `NGX_BUILD_` prefix are supported by the
-`ngx-build` script. Otherwise the environments are intrepreted by the `util/build.sh` script of
+`ngx-build` script. Otherwise the environments are interpreted by the `util/build.sh` script of
 each nginx C module project.
 
 `ngx-build` always tries to build things incrementally, so usually it's very fast to run. If the previous run of nginx's `./configure`
@@ -117,7 +117,7 @@ make: *** No rule to make target 'build', needed by 'default'.  Stop.
 failed to run command "make -j9"
 ```
 
-This is completely normal, and to fix this, you need to update the last modified timestamp of your
+This is completely normal, and to fix this, you need to update the last modified time stamp of your
 `config` file like below:
 
 ```
@@ -135,7 +135,7 @@ touch config && ./build13
 Do not touch the `config` file in other cases since it would only slow down your build by compiling everything from scratch.
 
 One thing to note here is that `ngx-build` never tries to add RPATH to the resulting nginx build, so it is each nginx C module
-project's reponsibility to do that if it is desired. It is usually done in the `util/build.sh` script of each project, as in
+project's responsibility to do that if it is desired. It is usually done in the `util/build.sh` script of each project, as in
 
 https://github.com/openresty/lua-nginx-module/blob/master/util/build.sh#L34
 
@@ -148,14 +148,15 @@ And it intentionally omits the RPATH for LuaJIT. This is because the developers 
 different builds of LuaJIT when running the test suite in different "test modes" of the Test::Nginx::Socket test scaffold without
 the burden of re-linking the local nginx binary.
 
-For example, when running the test suite with valgrind, the developers of `lua-nginx-module` would set the system environment
+For example, when running the test suite with Valgrind, the developers of `lua-nginx-module` would set the system environment
 
 ```bash
 export LD_LIBRARY_PATH=/usr/local/openresty-valgrind/luajit/lib:$LD_LIBRARY_PATH
 export TEST_NGINX_USE_VALGRIND=1
 ```
 
-Here we use the LuaJIT shipped with OpenResty's official binary package `openresty-valgrind`, which enables the system allocator which would only work atop Valgrind.
+Here we use the LuaJIT shipped with OpenResty's official binary package `openresty-valgrind`, which enables the system allocator
+which would only work atop Valgrind.
 
 And for normal running modes, we should switch to another LuaJIT at runtime like below:
 
@@ -163,7 +164,7 @@ And for normal running modes, we should switch to another LuaJIT at runtime like
 export LD_LIBRARY_PATH=/usr/local/openresty-debug/luajit/lib:$LD_LIBRARY_PATH
 ```
 
-or when running the tests in the "banchmark" test mode, switch to a non-debug build of LuaJIT:
+or when running the tests in the "benchmark" test mode, switch to a non-debug build of LuaJIT:
 
 ```bash
 export LD_LIBRARY_PATH=/usr/local/openresty/luajit/lib:$LD_LIBRARY_PATH
@@ -194,7 +195,7 @@ exec prove -I../test-nginx/lib "$@"
 ```
 
 It is very convenient to comment or uncomment the environment settings on demand. It is
-much harder to mess your envionrment settings up.
+much harder to mess your environment settings up.
 
 Once the `./go` script is ready, you can always run `./go -r t` to run the full test suite
 or `./go t/foo.t` to run a particular test file like `t/foo.t` (one can choose to run
@@ -208,10 +209,12 @@ here:
 https://openresty.gitbooks.io/programming-openresty/content/testing/
 
 The `ngx-build` script would try patching the nginx core with patches in the
-[openresty/openresty](https://github.com/openresty/openresty) github repo which
-is checked out locally as the `../openresty/` directory. But such patching process
+[openresty/openresty](https://github.com/openresty/openresty) and
+[openresty/no-pool-nginx](https://github.com/openresty/no-pool-nginx)
+github repos which are checked out locally as the `../openresty/` and `../no-pool-nginx/`
+directories, respectively. But such patching process
 only happens when the local `./buildroot/nginx-*` directory does not exist. So
-if you want to enforce patching the nginx core all over again (for exmaple, when you
+if you want to enforce patching the nginx core all over again (for example, when you
 toggle the values of the system environments `NGX_BUILD_NO_DEBUG`, `NGX_BUILD_DTRACE`,
 and/or ` NGX_BUILD_DISABLE_NO_POOL`, then you must re-apply the patches for the nginx
 core. You can do that by wiping out the `./buildroot/nginx-*` directories like this:
