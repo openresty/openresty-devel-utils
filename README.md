@@ -45,6 +45,16 @@ ngx-build
 The `ngx-build` tool is used by almost all our NGINX C module projects for everyday development,
 for example, [lua-nginx-module](https://github.com/openresty/lua-nginx-module/).
 
+First of all, you should always add the directory of this tool to your `PATH` system environment,
+like this:
+
+```bash
+export PATH=/path/to/openresty-devel-utils:$PATH
+```
+
+Replace the placeholder `/path/to/` with the real path in your system. You'd better put this line
+to your `~/.bashrc` file so that you can always have it.
+
 Usually, we have a `util/build.sh` shell script in each of the NGINX C module project's source
 tree, as in
 
