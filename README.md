@@ -191,6 +191,12 @@ or `./go t/foo.t` to run a particular test file like `t/foo.t` (one can choose t
 only an individual test block only in the `foo.t` file by temporarily inserting a
 `--- ONLY` section to that test block).
 
+Those system environments whose names start with `TEST_NGINX_` are those supported
+by the `Test::Nginx::Socket` test scaffold. You can find more details about this test scaffold
+here:
+
+https://openresty.gitbooks.io/programming-openresty/content/testing/
+
 The `ngx-build` script would try patching the nginx core with patches in the
 [openresty/openresty](https://github.com/openresty/openresty) github repo which
 is checked out locally as the `../openresty/` directory. But such patching process
@@ -205,6 +211,12 @@ rm -rf buildroot/nginx-*
 ```
 
 and then run the `./build13` script mentioned previously.
+
+The Travis CI build files for most of our nginx C module projects are also making use of
+this `ngx-build` tool (through `util/build.sh` script, of course) and can serve as more
+examples. For example,
+
+https://github.com/openresty/lua-nginx-module/blob/master/.travis.yml
 
 Copyright & License
 ===================
