@@ -502,6 +502,12 @@ sub apply_patches {
         chdir ".." or die "cannot switch to ..\n";
     }
 
+    if ($ver ge '001013006') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-init_cycle_pool_release.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
+
     if ($ver ge '001013003') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_balancer_export.patch");
