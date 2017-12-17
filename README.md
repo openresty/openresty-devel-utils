@@ -53,15 +53,15 @@ export PATH=/path/to/openresty-devel-utils:$PATH
 ```
 
 Replace the placeholder `/path/to/` with the real path in your system. You'd better put this line
-to your `~/.bashrc` file so that you can always have it.
+in your `~/.bashrc` file so that you can always have it.
 
 Usually, we have a `util/build.sh` shell script in each of the NGINX C module project's source
-tree, as in
+tree, as in:
 
 https://github.com/openresty/lua-nginx-module/blob/master/util/build.sh
 
 And then we create a local shell script, usually called something like `build13`
-(the number `13` means nginx 1.13.x) which contains the following content:
+(the number `13` means nginx 1.13.x) which contains the following:
 
 ```bash
 #!/usr/bin/env bash
@@ -82,7 +82,7 @@ export PCRE_INC=$PCRE/include
 
 export OPENSSL=/usr/local/openresty-debug/openssl
 export OPENSSL_INC=$OPENSSL/include
-export OPENSSL_LIB="$OPENSSL/lib
+export OPENSSL_LIB=$OPENSSL/lib
 
 export NGX_BUILD_CC="gcc"
 export NGX_BUILD_JOBS=9
@@ -92,7 +92,7 @@ exec ./util/build.sh 1.13.6
 ```
 
 The `ngx-build` script will download the specified version of the nginx source release tarball from
-nginx.org and caches it under `~/work/` in the local file system, and then build everything under
+nginx.org and caches it under `~/work/` in the local file system, and then builds everything under
 `./buildroot/nginx-1.13.6/` and finally, if everything builds fine, it will installs the nginx into
 `./work/nginx/`.
 
@@ -109,7 +109,7 @@ Only those system environments whose names start with the `NGX_BUILD_` prefix ar
 `ngx-build` script. Otherwise the environments are interpreted by the `util/build.sh` script of
 each nginx C module project.
 
-`ngx-build` always tries to build things incrementally, so usually it's very fast to run. If the previous run of nginx's `./configure`
+`ngx-build` always tries to build things incrementally, so it is usually very fast to run. If the previous run of nginx's `./configure`
 script fails, then subsequent `ngx-build` invokes would always fail with the following error message:
 
 ```
@@ -135,7 +135,7 @@ touch config && ./build13
 Do not touch the `config` file in other cases since it would only slow down your build by compiling everything from scratch.
 
 One thing to note here is that `ngx-build` never tries to add RPATH to the resulting nginx build, so it is each nginx C module
-project's responsibility to do that if it is desired. It is usually done in the `util/build.sh` script of each project, as in
+project's responsibility to do that if it is desired. It is usually done in the `util/build.sh` script of each project, as in:
 
 https://github.com/openresty/lua-nginx-module/blob/master/util/build.sh#L34
 
@@ -144,11 +144,11 @@ the `lua-nginx-module` project only adds RPATH for OpenSSL, PCRE, and Libdrizzle
 
 https://github.com/openresty/lua-nginx-module/blob/master/util/build.sh#L34
 
-And it intentionally omits the RPATH for LuaJIT. This is because the developers of `lua-nginx-module` usually wants to run
+And it intentionally omits the RPATH for LuaJIT. This is because the developers of `lua-nginx-module` usually want to run
 different builds of LuaJIT when running the test suite in different "test modes" of the Test::Nginx::Socket test scaffold without
 the burden of re-linking the local nginx binary.
 
-For example, when running the test suite with Valgrind, the developers of `lua-nginx-module` would set the system environment
+For example, when running the test suite with Valgrind, the developers of `lua-nginx-module` would set the system environment:
 
 ```bash
 export LD_LIBRARY_PATH=/usr/local/openresty-valgrind/luajit/lib:$LD_LIBRARY_PATH
@@ -171,7 +171,7 @@ export LD_LIBRARY_PATH=/usr/local/openresty/luajit/lib:$LD_LIBRARY_PATH
 ```
 
 Such runtime environment settings are conventionally put into a custom `./go` script at the root
-of each nginx C module project's source tree, as in
+of each nginx C module project's source tree, as in:
 
 ```bash
 #!/usr/bin/env bash
@@ -223,13 +223,15 @@ core. You can do that by wiping out the `./buildroot/nginx-*` directories like t
 rm -rf buildroot/nginx-*
 ```
 
-and then run the `./build13` script mentioned previously.
+and then run the `./build13` script previously mentioned.
 
 The Travis CI build files for most of our nginx C module projects are also making use of
 this `ngx-build` tool (through `util/build.sh` script, of course) and can serve as more
-examples. For example,
+examples. See for instance:
 
 https://github.com/openresty/lua-nginx-module/blob/master/.travis.yml
+
+[Back to TOC](#table-of-contents)
 
 Copyright & License
 ===================
