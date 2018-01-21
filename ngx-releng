@@ -15,8 +15,10 @@ fi
 
 echo =======================================
 
-cfiles=`find src -name 'ngx_*.[ch]'`
-hfiles=`find src -name 'ngx_*.h'`
+cfiles=`find -L src -name 'ngx_*.[ch]'`
+hfiles=`find -L src -name 'ngx_*.h'`
+
+#echo "C Files: $cfiles"
 
 #ack '/\*  +' src /dev/null && exit 1
 ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null && exit 1
