@@ -109,7 +109,7 @@ for my $file (@ARGV) {
 
         my $line_without_quote = $line;
         #while ($line_without_quote =~ s/"[^"]+"//g) {}
-        while ($line_without_quote =~ s#"[^"]+"#replace_quotes($&)#ge) {}
+        while ($line_without_quote =~ s#"(?:\\.|[^"]*)*"#replace_quotes($&)#ge) {}
 
         my $line_without_brackets = $line_without_quote;
         while ($line_without_brackets =~ s#\([^()]*\)#replace_quotes($&)#ge) {}
@@ -170,9 +170,9 @@ for my $file (@ARGV) {
                     && $lineno == $unclosed_brackets_lineno + 1
 
                     # skip: start with ')'
-                    && !($line_without_brackets =~ /^\s*\)/))
+                    && $line_without_brackets !~ /^\s*\)/)
                 {
-                    output "incorrect front space, unclosed bracket";
+                    output "incorrect front spaces, unclosed bracket";
                 }
 
                 # we only check the next line after '{' for now
@@ -181,7 +181,7 @@ for my $file (@ARGV) {
 
                     if ($space != $next_level_space) {
                         if (!($line =~ /^\s*\}/) && !($line =~ /^\w+:$/)) {
-                            output "incorrect front space, level indent";
+                            output "incorrect front spaces, level indent";
                         }
                     }
                 }
