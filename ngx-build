@@ -506,6 +506,7 @@ sub apply_patches {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-init_cycle_pool_release.patch");
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_ssl_preread_no_skip.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-resolver_conf_parsing.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
