@@ -68,11 +68,13 @@ while (1) {
             $indent = "    ";
         }
 
+        $bar = $bar x length($title);
+
         if ($title ne 'Table of Contents') {
             $toc .= "$indent* [$title](#$anchor)\n";
         }
 
-        $section = [$title, $&];
+        $section = [$title, "$title\n$bar\n"];
         push @sections, $section;
 
     } elsif ($s =~ /\G^(\#{1,})\s*(\S[^\n]*)\n/gsmc) {
