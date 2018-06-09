@@ -7,6 +7,9 @@ use Getopt::Std;
 
 my (@luas, @tests);
 
+my $RED = "\033[1;31m";
+my $NC = "\033[0m"; # No Color
+
 my %opts;
 getopts('Lse', \%opts) or die "Usage: lj-releng [-L] [-s] [-e] [files]\n";
 
@@ -93,11 +96,112 @@ sub process_file {
     }
     close $in;
 
-    p("Checking use of Lua global variables in file $file...");
-    p("op no. line     opcode  args        ; code");
-    blank("luajit -bL $file | grep -E 'G[GS]ET' | grep -vE '\\<(require|type|tostring|error|ngx|ndk|jit|setmetatable|getmetatable|string|table|io|os|print|tonumber|math|pcall|xpcall|unpack|pairs|ipairs|assert|module|package|coroutine|[gs]etfenv|next|rawget|rawset|rawlen|select|arg|bit)\\>'");
+    #p("Checking use of Lua global variables in file $file...");
+    #p("op no. line     opcode  args        ; code");
+    my $cmd = "luajit -bL $file";
+    open $in, "$cmd|"
+        or die "cannot open output pipe for \"$cmd\": $!";
+    my @sections;
+    my $sec;
+    while (<$in>) {
+
+        #warn "line: $_";
+
+        if (/^-- BYTECODE -- \S.*?:(\d+)-\d+$/) {
+            my $def_line = $1;
+            #warn "$file: $line";
+            if (defined $sec) {
+                push @sections, $sec;
+
+            }
+            $sec = {
+                def_line => $def_line,
+                gsets => [],
+                ggets => [],
+            };
+            next;
+        }
+
+        if (/^ \d+ \s+ \[ (\d+) \] \s+ G([GS])ET \s+ .*? ; \s+ \"([^"]+)" $/x) {
+            my ($line, $op, $name) = ($1, $2, $3);
+
+            #warn "found: $line $op $name";
+            if ($op eq 'S') {
+                push @{ $sec->{gsets} }, [$line, $name];
+            } else {
+                push @{ $sec->{ggets} }, [$line, $name];
+            }
+
+            next;
+        }
+
+        if (/^ \d+ \s+ \[ \d+ \] \s+ (G[GS]ET) \s+ $/x) {
+            die "bad $1 instruction: $_";
+        }
+    }
+    close $in;
+
+    if (defined $sec) {
+        push @sections, $sec;
+    }
+
+    my $last_idx = $#sections;
+    my $hits = 0;
+    my $i = 0;
+    for my $sec (@sections) {
+        my $def_line = $sec->{def_line};
+
+        my $gsets = $sec->{gsets};
+        my $ggets = $sec->{ggets};
+
+        for my $gset (@$gsets) {
+            $hits++;
+            my ($line, $name) = @$gset;
+            warn "${RED}ERROR${NC}: $file: line $line: setting the Lua global ",
+                 "\"$name\"\n";
+        }
+
+        if ($i == $last_idx) {
+            # being the top-level chunk
+
+            for my $gget (@$ggets) {
+                my ($line, $name) = @$gget;
+
+                if ($name =~ /^ (?: require|type|tostring|error|ngx|ndk|jit
+                                   |setmetatable|getmetatable|string|table|io
+                                   |os|print|tonumber|math|pcall|xpcall|unpack
+                                   |pairs|ipairs|assert|module|package
+                                   |coroutine|[gs]etfenv|next|rawget|rawset
+                                   |rawlen|select|arg|bit|debug|ngx|ndk)$/x)
+                {
+                    next;
+                }
+
+                $hits++;
+                warn "${RED}ERROR${NC}: $file: line $line: getting the Lua ",
+                     "global \"$name\"\n";
+            }
+
+            next;
+        }
+
+        for my $gget (@$ggets) {
+            $hits++;
+            my ($line, $name) = @$gget;
+            warn "${RED}ERROR${NC}: $file: line $line: getting the Lua ",
+                 "global \"$name\"\n";
+        }
+
+    } continue {
+        $i++;
+    }
+
     unless ($no_long_line_check) {
         p("Checking line length exceeding 80...");
         blank("grep -H -n -E --color '.{81}' $file");
+    }
+
+    if ($hits) {
+        exit 1;
     }
 }
