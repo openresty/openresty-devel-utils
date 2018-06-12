@@ -122,7 +122,7 @@ sub process_file {
             next;
         }
 
-        if (/^ \d+ \s+ \[ (\d+) \] \s+ G([GS])ET \s+ .*? ; \s+ \"([^"]+)" $/x) {
+        if (/^ \d+ \s+ \[ (\d+) \] \s+ (?: \W+ \s+ )? G([GS])ET \s+ .*? ; \s+ \"([^"]+)" $/x) {
             my ($line, $op, $name) = ($1, $2, $3);
 
             #warn "found: $line $op $name";
