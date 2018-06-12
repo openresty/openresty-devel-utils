@@ -27,7 +27,7 @@ if ($#ARGV != -1) {
     @luas = @ARGV;
 
 } else {
-    @luas = map glob, qw{ *.lua lib/*.lua lib/*/*.lua lib/*/*/*.lua lib/*/*/*/*.lua lib/*/*/*/*/*.lua };
+    @luas = split /\n/, `find . -name '*.lua'`;
     if (-d 't') {
         @tests = map glob, qw{ t/*.t t/*/*.t t/*/*/*.t };
     }
