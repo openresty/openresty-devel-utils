@@ -7,6 +7,7 @@ use Getopt::Std;
 
 my (@luas, @tests);
 
+my $hits = 0;
 my $RED = "\033[1;31m";
 my $NC = "\033[0m"; # No Color
 
@@ -40,6 +41,11 @@ for my $f (sort @luas) {
 for my $t (@tests) {
     blank(qq{grep -H -n --color -E '\\--- ?(ONLY|LAST)' $t});
 }
+
+if ($hits) {
+    exit 1;
+}
+
 # p: prints a string to STDOUT appending \n
 # w: prints a string to STDERR appending \n
 # Both respect the $silent value
@@ -146,7 +152,6 @@ sub process_file {
     }
 
     my $last_idx = $#sections;
-    my $hits = 0;
     my $i = 0;
     for my $sec (@sections) {
         my $def_line = $sec->{def_line};
@@ -196,12 +201,12 @@ sub process_file {
         $i++;
     }
 
+    if ($stop_on_error && $hits > 0) {
+        exit 1
+    }
+
     unless ($no_long_line_check) {
         p("Checking line length exceeding 80...");
         blank("grep -H -n -E --color '.{81}' $file");
-    }
-
-    if ($hits) {
-        exit 1;
     }
 }
