@@ -21,11 +21,7 @@ if ($help) {
 
 my $inplace = $opts{i};
 
-if ($inplace) {
-    die "TODO";
-}
-
-my $operation = shift or die "No operation specified";
+my $operation = shift or die "No operation specified.\n";
 
 if (!@ARGV) {
     warn "ERROR: no input file specified.\n\n";
@@ -33,12 +29,13 @@ if (!@ARGV) {
 }
 
 my $total_hits = 0;
+my $changed_files = 0;
 
 for my $file (@ARGV) {
     my ($out, $tmpfile);
     if ($inplace) {
         ($out, $tmpfile) =
-            tempfile("sed-pl-XXXXXXX.txt", UNLINK => 1, TMPDIR => 1);
+            tempfile("sed-pl-XXXXXXX", UNLINK => 1, TMPDIR => 1);
     }
 
     my $hits = 0;
@@ -64,11 +61,20 @@ for my $file (@ARGV) {
         if ($hits) {
             move $tmpfile, $file
                 or die "Cannot move $tmpfile to $file: $!\n";
+            $changed_files++;
         }
     }
 }
 
 warn "\nFound $total_hits hits.\n";
+
+if ($total_hits) {
+    warn "Updated $changed_files files.\n";
+    if (!$inplace) {
+        warn "  Hint: pass the -i option to actually update the files if the ",
+             "changes look good.\n";
+    }
+}
 
 sub usage ($) {
     my $rc = shift;
