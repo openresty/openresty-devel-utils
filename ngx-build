@@ -463,36 +463,12 @@ sub apply_patches {
     if ($ver ge '001011002') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process.patch");
-        chdir ".." or die "cannot switch to ..\n";
-    }
-
-    if ($ver ge '001011002') {
-        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-intercept_error_log.patch");
-        chdir ".." or die "cannot switch to ..\n";
-    }
-
-    if ($ver ge '001011002') {
-        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-single_process_graceful_exit.patch");
-        chdir ".." or die "cannot switch to ..\n";
-    }
-
-    if ($ver ge '001011002') {
-        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-delayed_posted_events.patch");
-        chdir ".." or die "cannot switch to ..\n";
-    }
-
-    if ($ver ge '001011002') {
-        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-builtin_error_page_footer.patch");
-        chdir ".." or die "cannot switch to ..\n";
-    }
-
-    if ($ver ge '001011002') {
-        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-balancer_status_code.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-builtin_error_page_footer.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-delayed_posted_events.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-single_process_graceful_exit.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-intercept_error_log.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-safe_resolver_ipv6_option.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
