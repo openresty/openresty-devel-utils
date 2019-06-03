@@ -315,10 +315,10 @@ sub apply_patches {
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     if ($ver ge '001015008') {
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_pending_session.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_sess_cb_yield.patch");
 
     } else {
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_sess_cb_yield.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_pending_session.patch");
     }
 
     chdir ".." or die "cannot switch to ..\n";
