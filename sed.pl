@@ -46,7 +46,9 @@ for my $file (@ARGV) {
         chomp;
         if (eval $operation) {
             $hits++;
-            print "$file:$.: $_\n";
+            if (!$inplace) {
+                print "$file:$.: $_\n";
+            }
         }
         if ($inplace) {
             print $out "$_\n";
