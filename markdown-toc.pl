@@ -113,7 +113,7 @@ open my $out, ">$outfile"
 
 my $i = 0;
 print $out $preamble;
-my $found_name;
+my $wrote_toc;
 for my $sec (@sections) {
     my ($title, $src) = @$sec;
     if ($title eq 'Table of Contents') {
@@ -131,9 +131,9 @@ for my $sec (@sections) {
         }
     }
 
-    if (!$found_name && $title =~ /^N(?i)ame$/) {
+    if (!$wrote_toc) {
         print $out "Table of Contents\n=================\n\n$toc\n";
-        $found_name = 1;
+        $wrote_toc = 1;
     }
 }
 
