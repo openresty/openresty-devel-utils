@@ -500,6 +500,12 @@ sub apply_patches {
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_proxy_timeout_fields.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    if ($ver ge '001017001') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-reuseport_close_unused_fds.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
