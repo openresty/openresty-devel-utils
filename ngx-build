@@ -501,9 +501,25 @@ sub apply_patches {
         chdir ".." or die "cannot switch to ..\n";
     }
 
+    if ($ver ge '001009005' && $ver lt '001014001'
+        || $ver ge '001015000' && $ver lt '001015006')
+    {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p0 < $root/../openresty/patches/patch.2018.h2.txt");
+        chdir ".." or die "cannot switch to ..\n";
+    }
+
     if ($ver ge '001017001') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-reuseport_close_unused_fds.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
+
+    if ($ver ge '001009005' && $ver lt '001016001'
+        || $ver ge '001017000' && $ver lt '001017003')
+    {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p0 < $root/../openresty/patches/patch.2019.h2.txt");
         chdir ".." or die "cannot switch to ..\n";
     }
 }
