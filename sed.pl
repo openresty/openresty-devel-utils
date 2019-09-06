@@ -10,7 +10,7 @@ use Getopt::Std qw( getopts );
 sub usage ($);
 
 my %opts;
-getopts("ih", \%opts)
+getopts("ihs", \%opts)
     or usage 1;
 
 my $help = $opts{h};
@@ -20,6 +20,8 @@ if ($help) {
 }
 
 my $inplace = $opts{i};
+
+my $single_str = $opts{s};
 
 my $operation = shift or die "No operation specified.\n";
 
@@ -42,18 +44,40 @@ for my $file (@ARGV) {
 
     open my $in, $file
         or die "Cannot open $file for reading: $!\n";
-    while (<$in>) {
-        chomp;
+
+    if ($single_str) {
+        my $old = do { local $/; <$in> };
+        $_ = $old;
+
+        #chomp;
         if (eval $operation) {
             $hits++;
             if (!$inplace) {
-                print "$file:$.: $_\n";
+                require Text::Diff;
+
+                print "$file:$.: ", Text::Diff::diff(\$old, \$_);
+                #print "$file:$.: $_\n";
             }
         }
         if ($inplace) {
             print $out "$_\n";
         }
+
+    } else {
+        while (<$in>) {
+            chomp;
+            if (eval $operation) {
+                $hits++;
+                if (!$inplace) {
+                    print "$file:$.: $_\n";
+                }
+            }
+            if ($inplace) {
+                print $out "$_\n";
+            }
+        }
     }
+
     close $in;
 
     $total_hits += $hits;
@@ -87,6 +111,7 @@ Usage:
 Optons:
     -h          Print this help.
     -i          Do in-place substitution
+    -s          Single string mode
 
 Example:
 
