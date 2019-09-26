@@ -221,6 +221,10 @@ sub apply_patches {
         shell("patch -p0 < $root/../no-pool-nginx/nginx-$version-no_pool.patch");
     }
 
+    unless ($ver lt '001009003') {
+        shell("patch -p0 < $root/../openresty/patches/nginx-$version-always_enable_cc_feature_tests.patch");
+    }
+
     if ($ver lt '001000014' || ($ver ge '001001000' && $ver lt '001001017')) {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         warn "applying the null char fixes security patch";
@@ -297,9 +301,9 @@ sub apply_patches {
     }
     #shell("patch -p0 < $root/../openresty/patches/nginx-$version-gzip_ok_invalid_read_fix.patch");
 
-    unless ($ver ge '001000009') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-log_escape_non_ascii.patch");
-    }
+    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+    shell("patch -p1 < $root/../openresty/patches/nginx-$version-log_escape_non_ascii.patch");
+    chdir ".." or die "cannot switch to ..\n";
 
     unless ($ver ge '001005003') {
         shell("patch -p0 < $root/../openresty/patches/nginx-$version-upstream_truncation.patch");
@@ -490,6 +494,7 @@ sub apply_patches {
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_ssl_preread_no_skip.patch");
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-resolver_conf_parsing.patch");
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-socket_cloexec.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-daemon_destroy_pool.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
@@ -501,9 +506,8 @@ sub apply_patches {
         chdir ".." or die "cannot switch to ..\n";
     }
 
-    if ($ver ge '001009005' && $ver lt '001014001'
-        || $ver ge '001015000' && $ver lt '001015006')
-    {
+    if ($ver ge '001015000' && $ver lt '001015006') {
+        # 1.9.5 to 1.14.0 (included) are alro vulnerable, but this patch does not apply
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p0 < $root/../openresty/patches/patch.2018.h2.txt");
         chdir ".." or die "cannot switch to ..\n";
@@ -515,9 +519,11 @@ sub apply_patches {
         chdir ".." or die "cannot switch to ..\n";
     }
 
-    if ($ver ge '001009005' && $ver lt '001016001'
+    if ($ver ge '001015006' && $ver lt '001016001'
         || $ver ge '001017000' && $ver lt '001017003')
     {
+        # 1.9.5 to 1.16.0 (included) are alro vulnerable, but this patch only
+        # applies to 1.15.6+
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p0 < $root/../openresty/patches/patch.2019.h2.txt");
         chdir ".." or die "cannot switch to ..\n";
