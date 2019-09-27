@@ -1,236 +1,244 @@
 #!/usr/bin/env bash
 
-wiki_file=`perl -e 'print glob "doc/*.wiki"'`
-if [ -n "$wiki_file" -a  -f "$wiki_file" ]; then
-    wiki2markdown.pl $wiki_file > README.markdown || exit 1
-    #wiki2pod.pl $wiki_file > /tmp/a.pod || exit 1
-    #pod2text /tmp/a.pod > README || exit 1
+DIR=${1:-$PWD}
+
+cd $DIR
+
+README_FILE=(README.*)
+
+if [ -f $README_FILE ]; then
+    wiki_file=`perl -e 'print glob "doc/*.wiki"'`
+    if [ -n "$wiki_file" -a  -f "$wiki_file" ]; then
+        echo "Generating $README_FILE"
+        (set -x; wiki2markdown.pl $wiki_file > $README_FILE 2>/dev/null || exit 1)
+        #wiki2pod.pl $wiki_file > /tmp/a.pod || exit 1
+        #pod2text /tmp/a.pod > README || exit 1
+    fi
+
+    grep -Pzo '(?<=This document describes).*(?:-nginx-module|ngx_\w+)\s*\[v\d+\.\d[^\s\]]*' $README_FILE \
+        | tr '\n' ' ' \
+        | ack '(\w+).*?\[v(\S+)' --output '$1 $2'
 fi
 
-if [ -f README.markdown ]; then
-    ack '(?<=This document describes )(?:.*-nginx-module|ngx_\w+) .*?v(\d+\.\d[^\s\]]*)' README.markdown
-elif [ -f README.md ]; then
-    ack '(?<=This document describes )(?:.*-nginx-module|ngx_\w+) .*?v(\d+\.\d[^\s\]]*)' README.md
-fi
+if [ -d src ]; then
+    echo "Checking sources in $PWD/src"
 
-echo =======================================
+    cfiles=`find -L src -name 'ngx_*.[ch]'`
+    hfiles=`find -L src -name 'ngx_*.h'`
 
-cfiles=`find -L src -name 'ngx_*.[ch]'`
-hfiles=`find -L src -name 'ngx_*.h'`
+    #ack '/\*  +' src /dev/null && exit 1
+    ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null
+    ack '\(\);' $hfiles /dev/null
+    ack '^\w+[^()]*?\*\s\w+' $hfiles /dev/null
+    ack '.{81}' $cfiles /dev/null
+    ack '[ \t]+$' $cfiles /dev/null
+    ack '(?<!:)//' $cfiles /dev/null
+    ack '^\s*?\t\s*\S' $cfiles /dev/null
+    ack '^static .*?\(\);' $cfiles /dev/null
+    ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
+    ack '_log_error\(NGX_[^L]' $cfiles /dev/null
+    ack '^static [^()]*?\*\s\w+' $cfiles /dev/null
+    ack '^\s*if\s*\([^()]+\)\s*$' $cfiles /dev/null
+    ack 'if \( |if \(! |if \(.*? \)' $cfiles /dev/null
+    ack '\b(?:if|for|while|switch)\(|\bdo\{' $cfiles /dev/null
+    ack '^\#\s*define\s+ngx_[a-z]+_\w+?_version\s+\d+' $cfiles /dev/null
 
-#echo "C Files: $cfiles"
-
-#ack '/\*  +' src /dev/null && exit 1
-ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null && exit 1
-ack '.{81}' $cfiles /dev/null
-ack '(?<!:)//' $cfiles /dev/null
-ack '[ \t]+$' $cfiles /dev/null
-ack '^\s*?\t\s*\S' $cfiles /dev/null
-ack '^master_on' `find t -name '*.t'` /dev/null
-ack '=== TEST \d+\s+' `find t -name '*.t'` /dev/null
-ack 'if \( |if \(! |if \(.*? \)' $cfiles /dev/null
-ack '\--- *(?:ONLY|LAST)' `find t -name '*.t'` /dev/null
-ack -l '\r\n' t /dev/null
-ack '\(\);' $hfiles /dev/null
-ack '^static .*?\(\);' $cfiles /dev/null
-ack '^static [^()]*?\*\s\w+' $cfiles /dev/null
-ack '^\w+[^()]*?\*\s\w+' $hfiles /dev/null
-ack '^[a-zA-Z]\w+\(\)$' $cfiles /dev/null
-ack '^\#\s*define\s+ngx_[a-z]+_\w+?_version\s+\d+$' $cfiles /dev/null
-ack '\b(?:if|for|while|switch)\(|\bdo\{' $cfiles /dev/null
-ack '^\s*if\s*\([^()]+\)\s*$' $cfiles /dev/null
-ack '^\s*plan\s+tests\s*=>.*?repeat_each\(\d+\)' t /dev/null
-
-perl -e 'use strict; use warnings;
-    for my $fname (@ARGV) {
-        my $func;
-        open my $in, $fname or die $!;
-        while (<$in>) {
-            next if /^\s*$/ || m{^\s*/\*};
-            if (/^[a-z]\w+\(\S+.*?\) \{$/) {
-                print "$fname:$.: \e[33m$_\e[0m";
-                undef $func;
-                next;
-            }
-
-            if (/^[a-z]\w+\(.*?,$/) {
-                $func = 1;
-                next;
-            }
-
-            if ($func && /^ {4}[a-z]\S+.*?,$/) {
-                next;
-            }
-
-            if ($func && /^ {4}[a-z]\S+.*? \{$/) {
-                print "$fname:$.: \e[33m$_\e[0m";
-                undef $func;
-                next;
-            }
-
-            undef $func;
-        }
-        close $in;
-    }' $cfiles
-
-perl -e 'use strict; use warnings;
-    for my $fname (@ARGV) {
-        my $seen;
-        open my $in, $fname or die $!;
-        while (<$in>) {
-            next if /^\s*$/ || m{^\s*/\*};
-            if (/^ {5,}\S+.*?\)$/) {
-                $seen = $_;
-                next;
-            }
-            if ($seen && /^\{$/) {
-                my $ln = $. - 1;
-                print "$fname:$ln: \e[33m$seen\e[0m";
-                undef $seen;
-                next;
-            }
-            undef $seen;
-        }
-        close $in;
-    }' $cfiles
-
-perl -e 'use strict; use warnings;
-    my $seen = 0;
-    my $saved;
-    my $indent;
-
-    my $supfile = "./ngx-releng.suppress";
-    my %whitelist;
-    if (open my $sup, "<$supfile") {
-        while (<$sup>) {
-            if (/^(\S+:\d+)$/) {
-                #warn "loaded rule $1\n";
-                $whitelist{$1} = 1;
-            }
-        }
-    }
-
-    for my $fname (@ARGV) {
-        open my $in, $fname or die $!;
-        while (<$in>) {
-            next if /^\s*$/ || m{^\s*/\*};
-            if (/ngx_(?:p[cn]*)?alloc\b|\b[mc]alloc\b|\bngx_array_push\b|\bngx_array_create\b|\bngx_alloc_chain_link\b|\bngx_c?alloc_buf\b|\bngx_create_temp_buf\b/) {
-                my $pattern = $&;
-                #warn "got pattern: $pattern\n";
-                if (!/return\b.*?\Q$pattern\E/ && !/"[^"]*\Q$pattern\E/ && !/^\s+\*/) {
-                    if (/^\s+/) {
-                        $indent = $&;
-                    } else {
-                        $indent = "";
-                    }
-
-                    if (/(\S+)\s*=\s*\Q$pattern\E/) {
-                        #warn "seen var $1\n";
-                        $seen = $1;
-
-                    } else {
-                        $seen = 1;
-                    }
-
-                    $saved = $_;
+    perl -e 'use strict; use warnings;
+        for my $fname (@ARGV) {
+            my $func;
+            open my $in, $fname or die $!;
+            while (<$in>) {
+                next if /^\s*$/ || m{^\s*/\*};
+                if (/^[a-z]\w+\(\S+.*?\) \{$/) {
+                    print "$fname:$.: \e[33m$_\e[0m";
+                    undef $func;
                     next;
                 }
+
+                if (/^[a-z]\w+\(.*?,$/) {
+                    $func = 1;
+                    next;
+                }
+
+                if ($func && /^ {4}[a-z]\S+.*?,$/) {
+                    next;
+                }
+
+                if ($func && /^ {4}[a-z]\S+.*? \{$/) {
+                    print "$fname:$.: \e[33m$_\e[0m";
+                    undef $func;
+                    next;
+                }
+
+                undef $func;
             }
-            if ($seen) {
-                if (/^\s+/) {
-                    if (length($&) > length($indent)) {
+            close $in;
+        }' $cfiles
+
+    perl -e 'use strict; use warnings;
+        for my $fname (@ARGV) {
+            my $seen;
+            open my $in, $fname or die $!;
+            while (<$in>) {
+                next if /^\s*$/ || m{^\s*/\*};
+                if (/^ {5,}\S+.*?\)$/) {
+                    $seen = $_;
+                    next;
+                }
+                if ($seen && /^\{$/) {
+                    my $ln = $. - 1;
+                    print "$fname:$ln: \e[33m$seen\e[0m";
+                    undef $seen;
+                    next;
+                }
+                undef $seen;
+            }
+            close $in;
+        }' $cfiles
+
+    perl -e 'use strict; use warnings;
+        my $seen = 0;
+        my $saved;
+        my $indent;
+
+        my $supfile = "./ngx-releng.suppress";
+        my %whitelist;
+        if (open my $sup, "<$supfile") {
+            while (<$sup>) {
+                if (/^(\S+:\d+)$/) {
+                    #warn "loaded rule $1\n";
+                    $whitelist{$1} = 1;
+                }
+            }
+        }
+
+        for my $fname (@ARGV) {
+            open my $in, $fname or die $!;
+            while (<$in>) {
+                next if /^\s*$/ || m{^\s*/\*};
+                if (/ngx_(?:p[cn]*)?alloc\b|\b[mc]alloc\b(?!\.)|\bngx_array_push\b|\bngx_array_create\b|\bngx_alloc_chain_link\b|\bngx_c?alloc_buf\b|\bngx_create_temp_buf\b/) {
+                    my $pattern = $&;
+                    #warn "got pattern: $pattern\n";
+                    if (!/return\b.*?\Q$pattern\E/ && !/"[^"]*\Q$pattern\E/ && !/^\s+\*/) {
+                        if (/^\s+/) {
+                            $indent = $&;
+                        } else {
+                            $indent = "";
+                        }
+
+                        if (/(\S+)\s*=\s*\Q$pattern\E/) {
+                            #warn "seen var $1\n";
+                            $seen = $1;
+
+                        } else {
+                            $seen = 1;
+                        }
+
+                        $saved = $_;
                         next;
                     }
                 }
+                if ($seen) {
+                    if (/^\s+/) {
+                        if (length($&) > length($indent)) {
+                            next;
+                        }
+                    }
 
-                if (($seen ne 1 && !/\bif\b.*?\Q$seen\E\s*==\s*NULL/)
-                    || ($seen eq 1 && !/\bif\b.*?\s*==\s*NULL/))
-                {
-                    if (!$whitelist{"$fname:$."}) {
-                        warn "not check NULL: $fname: line $.: $saved$_";
+                    if (($seen ne 1 && !/\bif\b.*?\Q$seen\E\s*==\s*NULL/)
+                        || ($seen eq 1 && !/\bif\b.*?\s*==\s*NULL/))
+                    {
+                        if (!$whitelist{"$fname:$."}) {
+                            print "missing NULL check: $fname: line $.: $saved$_";
+                        }
                     }
                 }
+                $seen = 0;
             }
-            $seen = 0;
-        }
-        close $in;
-    }' $cfiles
+            close $in;
+        }' $cfiles
 
-perl -e 'use strict; use warnings;
-    for my $fname (@ARGV) {
-        my $seen;
-        open my $in, $fname or die $!;
-        while (<$in>) {
-            if (/^[a-z]\w*:$/) {
-                $seen = $_;
-                next;
-            }
-            if ($seen && !/^$/) {
-                my $ln = $. - 1;
-                print "$fname:$ln: \e[33m$seen\e[0m";
-                undef $seen;
-                next;
-            }
-            undef $seen;
-        }
-        close $in;
-    }' $cfiles
-
-ack '_log_error\(NGX_[^L]' $cfiles /dev/null
-
-perl -e 'use strict; use warnings;
-    for my $fname (@ARGV) {
-        my $seen;
-        open my $in, $fname or die $!;
-        while (<$in>) {
-            if (/^ngx_\w+?_create_(loc|srv|main)_conf\s*\(/) {
-                $seen = 1;
-                next;
-            }
-            if ($seen && /\breturn\s+NGX_CONF_ERROR/) {
-                my $ln = $.;
-                $seen = $_;
-                print "$fname:$ln: \e[33m$seen\e[0m";
-                next;
-            }
-            if (/^}$/) {
-                undef $seen;
-            }
-        }
-        close $in;
-    }
-' $cfiles
-
-perl -e '
-    use strict; use warnings;
-    my $line_cont;
-    for my $fname (@ARGV) {
-        open my $in, $fname or die $!;
-        while (<$in>) {
-            if (m{^ ( \# \s* [a-z]\w* .* ) (\\ \s*) $}x) {
-                 $line_cont = 1;
-
-                if (length $1 != 77) {
-                    print "$fname:$.: \e[33m$1\e[0m$2";
+    perl -e 'use strict; use warnings;
+        for my $fname (@ARGV) {
+            my $seen;
+            open my $in, $fname or die $!;
+            while (<$in>) {
+                if (/^[a-z]\w*:$/) {
+                    $seen = $_;
                     next;
                 }
-
-            } elsif (m{^ (\s+ .* ) (\\ \s*) $}x) {
-                if (!$line_cont) {
-                    print "$fname:$.: $_";
-                }
-
-                if (length $1 != 77) {
-                    print "$fname:$.: \e[33m$1\e[0m$2";
+                if ($seen && !/^$/) {
+                    my $ln = $. - 1;
+                    print "$fname:$ln: \e[33m$seen\e[0m";
+                    undef $seen;
                     next;
                 }
-             }
-        }
-        close $in;
-    }
-    ' $cfiles
+                undef $seen;
+            }
+            close $in;
+        }' $cfiles
 
-ngx-style.pl $cfiles
+    perl -e 'use strict; use warnings;
+        for my $fname (@ARGV) {
+            my $seen;
+            open my $in, $fname or die $!;
+            while (<$in>) {
+                if (/^ngx_\w+?_create_(loc|srv|main)_conf\s*\(/) {
+                    $seen = 1;
+                    next;
+                }
+                if ($seen && /\breturn\s+NGX_CONF_ERROR/) {
+                    my $ln = $.;
+                    $seen = $_;
+                    print "$fname:$ln: \e[33m$seen\e[0m";
+                    next;
+                }
+                if (/^}$/) {
+                    undef $seen;
+                }
+            }
+            close $in;
+        }' $cfiles
 
-echo done.
+    perl -e '
+        use strict; use warnings;
+        my $line_cont;
+        for my $fname (@ARGV) {
+            open my $in, $fname or die $!;
+            while (<$in>) {
+                if (m{^ ( \# \s* [a-z]\w* .* ) (\\ \s*) $}x) {
+                     $line_cont = 1;
 
+                    if (length $1 != 77) {
+                        print "$fname:$.: \e[33m$1\e[0m$2";
+                        next;
+                    }
+
+                } elsif (m{^ (\s+ .* ) (\\ \s*) $}x) {
+                    if (!$line_cont) {
+                        print "$fname:$.: $_";
+                    }
+
+                    if (length $1 != 77) {
+                        print "$fname:$.: \e[33m$1\e[0m$2";
+                        next;
+                    }
+                 }
+            }
+            close $in;
+        }' $cfiles
+
+    ngx-style.pl $cfiles
+fi
+
+if [ -d src ]; then
+    echo "Checking tests in $PWD/t"
+
+    tfiles=`find -L t -name '*.t'`
+
+    ack -l '\r\n' $tfiles /dev/null
+    ack '^master_on' $tfiles /dev/null
+    ack '=== TEST \d+\s+' $tfiles /dev/null
+    ack '\--- *(?:ONLY|LAST)' $tfiles /dev/null
+    ack '^\s*plan\s+tests\s*=>.*?repeat_each\(\d+\)' $tfiles /dev/null
+fi
