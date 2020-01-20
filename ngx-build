@@ -367,10 +367,6 @@ sub apply_patches {
         chdir ".." or die "cannot switch to ..\n";
     }
 
-    if ($ver ge '001004001') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-gcc-maybe-uninitialized-warning.patch");
-    }
-
     unless ($ver ge '001005003') {
         shell("patch -p0 < $root/../openresty/patches/nginx-$version-unix_socket_accept_over_read.patch");
     }
