@@ -237,19 +237,18 @@ https://github.com/openresty/lua-nginx-module/blob/master/.travis.yml
 reindex
 ---------
 
-The `reindex` is used to unify the index format of the test files of each module under
-[Openresty](https://github.com/openresty). These test files are written based on
-[Test::Nginx](https://github.com/openresty/test-nginx). And you can install this tool like
+The `reindex` is used to unify the block title format of the test files, which are written based on
+[Test::Base](https://metacpan.org/pod/Test::Base). And you can install this tool like
 [ngx-build](#ngx-build).
 
-The `reindex` will unify the index format of each test file according to the following conditions:
-* Ensure that all test cases starting with `=== TEST {$index}` are sequentially numbered starting from `${begin_index}`.
-* Ensure 3 newlines between test cases.
+The `reindex` will unify the block title format of each test file according to the following conditions:
+* Ensure that all test blocks starting with `=== TEST {$index}` are sequentially numbered starting from `${begin_index}`.
+* Ensure 3 newlines between two blocks.
 * Ensure that there is a line break between the first test case and the separator(`__DATA__` or `__END__`).
 
 You can run `reindex` like this:
 ```
-# -b: the begin index of test cases in each test file.
+# -b: the begin index of test blocks in each test file.
 reindex -b 1 /path/to/module/t*.t
 ```
 
