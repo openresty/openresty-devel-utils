@@ -248,8 +248,13 @@ The `reindex` will unify the block title format of each test file according to t
 
 You can run `reindex` like this:
 ```
-# -b: the begin index of test blocks in each test file.
-reindex -b 1 /path/to/module/t*.t
+reindex /path/to/module/t*.t
+```
+
+Also you can set the begin index of test block in each test file by the `-b {$index}` command-line option,
+its default option is `1`.
+```
+reindex -b 0 /path/to/module/t*.t
 ```
 
 [Back to TOC](#table-of-contents)
