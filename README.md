@@ -9,6 +9,7 @@ Table of Contents
 * [NAME](#name)
 * [Description](#description)
     * [ngx-build](#ngx-build)
+    * [reindex](#reindex)
 * [Copyright & License](#copyright--license)
 
 Description
@@ -230,6 +231,31 @@ this `ngx-build` tool (through `util/build.sh` script, of course) and can serve 
 examples. See for instance:
 
 https://github.com/openresty/lua-nginx-module/blob/master/.travis.yml
+
+[Back to TOC](#table-of-contents)
+
+reindex
+---------
+
+The `reindex` is used to unify the block title format of the test files, which are written based on
+[Test::Base](https://metacpan.org/pod/Test::Base). And you can install this tool like
+[ngx-build](#ngx-build).
+
+The `reindex` will unify the block title format of each test file according to the following conditions:
+* Ensure that all test blocks starting with `=== TEST {$index}` are sequentially numbered starting from `${begin_index}`.
+* Ensure 3 newlines between two blocks.
+* Ensure that there is a line break between the first test case and the separator(`__DATA__` or `__END__`).
+
+You can run `reindex` like this:
+```
+reindex /path/to/module/t*.t
+```
+
+Also you can set the begin index of test block in each test file by the `-b {$index}` command-line option,
+its default option is `1`.
+```
+reindex -b 0 /path/to/module/t*.t
+```
 
 [Back to TOC](#table-of-contents)
 
