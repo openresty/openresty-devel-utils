@@ -21,6 +21,9 @@ for my $file (@ARGV) {
 
     my $level = 0;
 
+    # block flags
+    my ($just_enter_block, $just_leave_block, $blank_between_block) = (0, 0, 0);
+
     # comment flags
     my ($full_comment, $one_line_comment, $half_line_comment, $comment_not_end) = (0, 0, 0, 0);
 
@@ -43,6 +46,10 @@ for my $file (@ARGV) {
 
         #print "$lineno: $line";
 
+        if ($line =~ /vi:set/) {
+            last;
+        }
+
         if ($line =~ /\r\n$/) {
             output "found DOS line ending";
         }
@@ -63,14 +70,20 @@ for my $file (@ARGV) {
         }
 
         # function close or struct close
-        if ($need_variable_align == 1 && $line =~ /^}/) {
-            $need_variable_align = 0;
-            $variable_align_space = 0;
+        if ($line =~ /^}/) {
+            $just_leave_block = 1;
+            $blank_between_block = 2;
+
+            if ($need_variable_align == 1) {
+                $need_variable_align = 0;
+                $variable_align_space = 0;
+            }
         }
 
         # one line comment
         if ($line =~ /^#/) {
             $full_comment = 1;
+            $just_leave_block = 0;
 
             if ($line =~ /\\$/) {
                 $comment_not_end = 1;
@@ -242,6 +255,27 @@ for my $file (@ARGV) {
             }
         }
 
+        if ($just_enter_block == 1) {
+            if ($line eq "\n") {
+                output "found blank line in first line";
+            } else {
+                $just_enter_block = 0;
+            }
+        }
+
+        if ($just_leave_block == 1 && !($line =~ /^}/)) {
+            if ($line eq "\n") {
+                $blank_between_block--;
+            } else {
+                $just_leave_block = 0;
+
+                if ($blank_between_block != 0) {
+                    my $blank_line = 2 - $blank_between_block;
+                    output "found $blank_line blank line between blocks";
+                }
+            }
+        }
+
         # leave comment after the comment block end
         if ($line =~ /^((?<!\*\/).)*\*\// || $line =~ /^#endif/) {
             $full_comment = 0;
@@ -265,6 +299,7 @@ for my $file (@ARGV) {
         if ($line =~ /^{$/ || $line =~ /struct \w+ \{$/) {
             $need_variable_align = 1;
             $variable_align_space = 0;
+            $just_enter_block = 1;
         }
     }
 }
