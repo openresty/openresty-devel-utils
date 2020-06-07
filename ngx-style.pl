@@ -46,10 +46,6 @@ for my $file (@ARGV) {
 
         #print "$lineno: $line";
 
-        if ($line =~ /vi:set/) {
-            last;
-        }
-
         if ($line =~ /\r\n$/) {
             output "found DOS line ending";
         }
@@ -269,10 +265,17 @@ for my $file (@ARGV) {
             } else {
                 $just_leave_block = 0;
 
-                if ($blank_between_block != 0) {
-                    my $blank_line = 2 - $blank_between_block;
-                    output "found $blank_line blank line between blocks";
-                }
+                #if ($line =~ /^\/\* vi:set/) {
+                #    if ($blank_between_block != 1) {
+                #        my $blank_line = 2 - $blank_between_block;
+                #        output "found $blank_line blank line before vi:set";
+                #    }
+                #} else {
+                #    if ($blank_between_block != 0) {
+                #        my $blank_line = 2 - $blank_between_block;
+                #        output "found $blank_line blank line between blocks";
+                #    }
+                #}
             }
         }
 
