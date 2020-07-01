@@ -36,6 +36,9 @@ for my $file (@ARGV) {
     # variable align flags
     my ($need_variable_align, $variable_align_space) = (0, 0, 0);
 
+    # blank lines between functions
+    my ($expect_empty_lines, $should_not_empty) = (0, 0);
+
     while (<$in>) {
         $line = $_;
 
@@ -265,6 +268,34 @@ for my $file (@ARGV) {
         if ($line =~ /^{$/ || $line =~ /struct \w+ \{$/) {
             $need_variable_align = 1;
             $variable_align_space = 0;
+        }
+
+        if ($expect_empty_lines) {
+            if ($line =~ m{^\r?\n$}x) {
+                $expect_empty_lines--;
+                $should_not_empty = $expect_empty_lines == 0 ? 1 : 0;
+
+            } else {
+                # ignore vi setting in the end of the file
+                # ignore } followed by a blank line and #endif
+                if ($line !~ m{(\#endif|vi:set)}x) {
+                    output "need to keep two blank lines between functions";
+                }
+
+                $expect_empty_lines = 0;
+                $should_not_empty = 0;
+            }
+
+        } elsif ($should_not_empty) {
+            if ($line =~ m{^\r?\n$}x) {
+                output "too many blank lines between functions";
+            }
+
+            $should_not_empty = 0;
+        }
+
+        if ($line =~ m{^(\}\r?\n)$}x) {
+            $expect_empty_lines = 2;
         }
     }
 }
