@@ -271,30 +271,31 @@ for my $file (@ARGV) {
         }
 
         if ($expect_empty_lines) {
-            if ($line =~ m{^\r?\n$}x) {
+            if ($line =~ m{^\r?\n$}) {
                 $expect_empty_lines--;
-                $should_not_empty = $expect_empty_lines == 0 ? 1 : 0;
+                if ($expect_empty_lines == 0) {
+                    $should_not_empty = 1;
+                }
 
             } else {
                 # ignore vi setting in the end of the file
                 # ignore } followed by a blank line and #endif
-                if ($line !~ m{(\#endif|vi:set)}x) {
+                if ($line !~ m{(\#endif|vi:set)}) {
                     output "need to keep two blank lines between functions";
                 }
 
-                $expect_empty_lines = 0;
-                $should_not_empty = 0;
+                undef $expect_empty_lines;
             }
 
         } elsif ($should_not_empty) {
-            if ($line =~ m{^\r?\n$}x) {
-                output "too many blank lines between functions";
+            if ($line =~ m{^\r?\n$}) {
+                output "too many blank lines between functions, expect tow";
             }
 
-            $should_not_empty = 0;
+            undef $should_not_empty;
         }
 
-        if ($line =~ m{^(\}\r?\n)$}x) {
+        if ($line =~ m{^\}.*$}) {
             $expect_empty_lines = 2;
         }
     }
