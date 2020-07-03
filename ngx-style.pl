@@ -280,7 +280,7 @@ for my $file (@ARGV) {
             } else {
                 # ignore vi setting in the end of the file
                 # ignore } followed by a blank line and #endif
-                if ($line !~ m{(\#endif|vi:set)}) {
+                if ($line !~ m{(\#|vi:set)}) {
                     output "need to keep two blank lines between functions";
                 }
 
