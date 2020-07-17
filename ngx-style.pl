@@ -182,7 +182,6 @@ for my $file (@ARGV) {
 
                 # we only check the next line after '{' for now
                 if ($next_level == 1) {
-
                     $next_level = 0;
 
                     if ($space != $next_level_space) {
