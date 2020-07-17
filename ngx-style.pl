@@ -147,7 +147,7 @@ for my $file (@ARGV) {
             }
 
             # 3.
-            if ($line =~ /\(\w+\)\w+/) {
+            if ($line =~ /\(\w+( \*+)?\)\w+/) {
                 output "need space after )";
             }
         }
@@ -178,6 +178,15 @@ for my $file (@ARGV) {
                     output "incorrect front spaces, unclosed bracket";
                 }
 
+                # skip fall through case
+                if ($line =~ /^\s*case\b(\s*).*:/) {
+                    if ($1 ne ' ') {
+                        output "incorrect use of whitespace chars after 'case' "
+                               . "(one and only one space is required here)";
+                    }
+                    $next_level = 0;
+                }
+
                 # we only check the next line after '{' for now
                 if ($next_level == 1) {
                     $next_level = 0;
@@ -196,7 +205,9 @@ for my $file (@ARGV) {
             }
 
             # enter next level state
-            if ($macro_defined == 0 && $line =~ /^((?<!switch).)*{\n$/) {
+            if ($macro_defined == 0
+                && ($line =~ /^((?<!switch).)*{\n$/ || $line =~ /^\s*case\b.*?:/))
+            {
                 $next_level = 1;
                 $next_level_space = $space + 4;
             }
