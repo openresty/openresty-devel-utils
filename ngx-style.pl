@@ -144,7 +144,7 @@ for my $file (@ARGV) {
             }
 
             # 3.
-            if ($line =~ /\([a-zA-Z0-9_*]+( \*)?\)[a-zA-Z_]+/) {
+            if ($line =~ /\([a-zA-Z0-9_*]+( \*)?\)[a-zA-Z_]/) {
                 output "need space after )";
             }
         }
@@ -176,7 +176,7 @@ for my $file (@ARGV) {
                 }
 
                 # skip fall through case
-                if ($line =~ /^ +(?:case).*$/) {
+                if ($line =~ /^ +(?:case ).*:/) {
                     $next_level = 0;
                 }
 
@@ -198,8 +198,8 @@ for my $file (@ARGV) {
             }
 
             # enter next level state
-            if ($macro_defined == 0 
-                && ($line =~ /^((?<!switch).)*{\n$/ || $line =~ /^ +case.*\n$/)) {
+            if ($macro_defined == 0
+                && ($line =~ /^((?<!switch).)*{\n$/ || $line =~ /^ +case .*:/)) {
                 $next_level = 1;
                 $next_level_space = $space + 4;
             }
