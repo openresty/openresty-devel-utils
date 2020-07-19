@@ -144,7 +144,7 @@ for my $file (@ARGV) {
             }
 
             # 3.
-            if ($line =~ /\(\w+( \*)?\)\w+/) {
+            if ($line =~ /\(\w+( \*+)?\)\w+/) {
                 output "need space after )";
             }
         }
