@@ -39,12 +39,54 @@ for my $file (@ARGV) {
     # blank lines between functions
     my ($expect_empty_lines, $should_not_empty) = (0, 0);
 
+    # empty line before else code block
+    my ($cur_line_is_empty, $prev_line_is_empty, $consecutive_empty_lines) = (0, 0, 0);
+
+    my ($cur_line_is_code_block_end, $prev_line_is_code_block_end) = (0, 0);
+
     while (<$in>) {
         $line = $_;
 
         $lineno++;
 
         #print "$lineno: $line";
+
+        $prev_line_is_empty = $cur_line_is_empty;
+        if ($line =~ /^\n$/) {
+            $cur_line_is_empty = 1;
+            $consecutive_empty_lines++;
+
+        } else {
+            $cur_line_is_empty = 0;
+            $consecutive_empty_lines = 0;
+        }
+
+        if ($line =~ /^\s+\} else/) {
+            if (!$prev_line_is_empty) {
+                output "need a blank line before else code blocks.";
+            }
+
+            if ($consecutive_empty_lines > 1) {
+                output "need a blank line before else code blocks,"
+                . " got $consecutive_empty_lines.";
+            }
+        }
+
+        $prev_line_is_code_block_end = $cur_line_is_code_block_end;
+        # eg: } /* xxx */, comment is optional
+        if ($line =~ /^\s+\}(\s+\/\*.*)?\n$/) {
+            $cur_line_is_code_block_end = 1;
+
+        } else {
+            $cur_line_is_code_block_end = 0;
+            if ($prev_line_is_code_block_end && !$cur_line_is_empty) {
+                # skip macro, brace(in first column), comment, break statement, return statement,
+                # dd() function call
+                if ($line !~ /^(#|\}|\s+\/\*|\s+break;|\s+return)|\s+dd\(/) {
+                    output "need a blank line after code blocks";
+                }
+            }
+        }
 
         if ($line =~ /\r\n$/) {
             output "found DOS line ending";
