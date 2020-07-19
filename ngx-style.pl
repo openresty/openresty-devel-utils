@@ -73,13 +73,14 @@ for my $file (@ARGV) {
         }
 
         $prev_line_is_code_block_end = $cur_line_is_code_block_end;
+        # eg: } /* xxx */, comment is optional
         if ($line =~ /^\s+\}(\s+\/\*.*)?\n$/) {
             $cur_line_is_code_block_end = 1;
 
         } else {
             $cur_line_is_code_block_end = 0;
             if ($prev_line_is_code_block_end && !$cur_line_is_empty) {
-                # skip macro, comment, break statement, return statement,
+                # skip macro, brace(in first column), comment, break statement, return statement,
                 # dd() function call
                 if ($line !~ /^(#|\}|\s+\/\*|\s+break;|\s+return)|\s+dd\(/) {
                     output "need a blank line after code blocks";
