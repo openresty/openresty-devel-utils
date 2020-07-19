@@ -39,12 +39,53 @@ for my $file (@ARGV) {
     # blank lines between functions
     my ($expect_empty_lines, $should_not_empty) = (0, 0);
 
+    # empty line before else code block
+    my ($is_empty_line, $is_last_line_empty, $consecutive_empty_lines) = (0, 0, 0);
+
+    my ($is_cur_code_block_end, $is_last_code_block_end) = (0, 0);
+
     while (<$in>) {
         $line = $_;
 
         $lineno++;
 
         #print "$lineno: $line";
+
+        $is_last_line_empty = $is_empty_line;
+        if ($line =~ /^\n$/) {
+            $is_empty_line = 1;
+            $consecutive_empty_lines++;
+
+        } else {
+            $is_empty_line = 0;
+            $consecutive_empty_lines = 0;
+        }
+
+        if ($line =~ /^\s+\} else/) {
+            if (!$is_last_line_empty) {
+                output "need a blank line before else code blocks.";
+            }
+
+            if ($consecutive_empty_lines > 1) {
+                output "need a blank line before else code blocks,"
+                . " got $consecutive_empty_lines.";
+            }
+        }
+
+        $is_last_code_block_end = $is_cur_code_block_end;
+        if ($line =~ /^\s+\}(\s+\/\*.*)?\n$/) {
+            $is_cur_code_block_end = 1;
+
+        } else {
+            $is_cur_code_block_end = 0;
+            if ($is_last_code_block_end && !$is_empty_line) {
+                # skip macro, comment, break statement, return statement,
+                # dd() function call
+                if ($line !~ /^(#|\}|\s+\/\*|\s+break;|\s+return)|\s+dd\(/) {
+                    output "need a blank line after code blocks";
+                }
+            }
+        }
 
         if ($line =~ /\r\n$/) {
             output "found DOS line ending";
