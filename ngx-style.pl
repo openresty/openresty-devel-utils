@@ -176,7 +176,11 @@ for my $file (@ARGV) {
                 }
 
                 # skip fall through case
-                if ($line =~ /^ +(?:case ).*:/) {
+                if ($line =~ /^\s*case\b(\s*).*:/) {
+                    if ($1 ne ' ') {
+                        output "incorrect use of whitespace chars after 'case' "
+                               . "(one and only one space is required here)";
+                    }
                     $next_level = 0;
                 }
 
@@ -199,7 +203,8 @@ for my $file (@ARGV) {
 
             # enter next level state
             if ($macro_defined == 0
-                && ($line =~ /^((?<!switch).)*{\n$/ || $line =~ /^ +case .*:/)) {
+                && ($line =~ /^((?<!switch).)*{\n$/ || $line =~ /^\s*case\b.*?:/))
+            {
                 $next_level = 1;
                 $next_level_space = $space + 4;
             }
