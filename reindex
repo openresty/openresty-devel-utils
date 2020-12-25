@@ -33,6 +33,7 @@ sub reindex {
     my $changed;
     while (<$in>) {
         s/\r$//;
+
         my $num;
         s/ ^ === \s+ TEST \s+ (\d+)/$num=$1; "=== TEST " . $counter++/xie;
         next if !defined $num;
@@ -45,6 +46,7 @@ sub reindex {
     close $in;
 
     my $text = join '', @lines;
+    $text .= "\n"; #last line should end with newline
     $text =~ s/\n\n+\z/\n/sm;
     $text =~ s/(?x) \n+ === \s+ TEST/\n\n\n\n=== TEST/ixsg;
     $text =~ s/__(DATA|END)__\n+=== TEST/__${1}__\n\n=== TEST/;
