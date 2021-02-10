@@ -12,16 +12,31 @@ my $RED = "\033[1;31m";
 my $NC = "\033[0m"; # No Color
 
 my %opts;
-getopts('Lse', \%opts) or die "Usage: lj-releng [-L] [-s] [-e] [files]\n";
+getopts('Lsea:', \%opts)
+    or die "Usage: lj-releng [-L] [-s] [-e] [-a allow_list] [files]\n";
 
 my $silent = $opts{s};
 my $stop_on_error = $opts{e};
 my $no_long_line_check = $opts{L};
+my $allow_list = $opts{a};
 
 my $check_lua_ver = "luajit -v | awk '{print\$2}'| grep 2.1";
 my $output = `$check_lua_ver`;
 if ($output eq '') {
     die "ERROR: lj-releng ONLY supports LuaJIT 2.1!\n";
+}
+
+my %allow_rules;
+if ($allow_list) {
+    open my $reader, $allow_list
+        or die "Can't open $allow_list for reading\n";
+
+    while (<$reader>) {
+        chomp($_);
+        $allow_rules{"$_"} = 1;
+    }
+
+    close $reader;
 }
 
 if ($#ARGV != -1) {
@@ -160,8 +175,13 @@ sub process_file {
         my $ggets = $sec->{ggets};
 
         for my $gset (@$gsets) {
-            $hits++;
             my ($line, $name) = @$gset;
+            if (exists($allow_rules{$name})) {
+                next;
+            }
+
+            $hits++;
+
             warn "${RED}ERROR${NC}: $file: line $line: setting the Lua global ",
                  "\"$name\"\n";
         }
@@ -172,18 +192,20 @@ sub process_file {
             for my $gget (@$ggets) {
                 my ($line, $name) = @$gget;
 
-                if ($name =~ /^ (?: require|type|tostring|error|ngx|ndk|jit
+                if ( ($name =~ /^ (?: require|type|tostring|error|ngx|ndk|jit
                                    |setmetatable|getmetatable|string|table|io
                                    |os|print|tonumber|math|pcall|xpcall|unpack
                                    |pairs|ipairs|assert|module|package
                                    |coroutine|[gs]etfenv|next|rawget|rawset
-                                   |loadstring|dofile
+                                   |loadstring|dofile|loadfile
                                    |rawlen|select|arg|bit|debug|ngx|ndk)$/x)
+                    or (exists($allow_rules{$name})) )
                 {
                     next;
                 }
 
                 $hits++;
+
                 warn "${RED}ERROR${NC}: $file: line $line: getting the Lua ",
                      "global \"$name\"\n";
             }
@@ -192,8 +214,13 @@ sub process_file {
         }
 
         for my $gget (@$ggets) {
-            $hits++;
             my ($line, $name) = @$gget;
+            if (exists($allow_rules{$name})) {
+                next;
+            }
+
+            $hits++;
+
             warn "${RED}ERROR${NC}: $file: line $line: getting the Lua ",
                  "global \"$name\"\n";
         }
