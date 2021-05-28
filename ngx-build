@@ -525,7 +525,7 @@ sub apply_patches {
     if ($ver ge '000006018' && $ver le '001020000') {
         # 0.6.18 to 1.20.0 (included) are vulnerable
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        warn "applying patch for the DNS resolver security vulnerability (CVE-2021-23017)";
+        warn "applying patch for the NGINX resolver security vulnerability (CVE-2021-23017)";
         shell("patch -p0 < $root/../openresty/patches/patch.2021.resolver.txt");
         chdir ".." or die "cannot switch to ..\n";
     }
