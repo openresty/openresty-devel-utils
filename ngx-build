@@ -521,6 +521,13 @@ sub apply_patches {
         shell("patch -p0 < $root/../openresty/patches/patch.2019.h2.txt");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    if ($ver ge '000618000' && $ver lt '001020000') {
+        # 0.6.18 to 1.20.0 (included) are vulnerable
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p0 < $root/patches/patch.2021.resolver.txt");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
