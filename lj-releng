@@ -197,7 +197,7 @@ sub process_file {
                                    |os|print|tonumber|math|pcall|xpcall|unpack
                                    |pairs|ipairs|assert|module|package
                                    |coroutine|[gs]etfenv|next|rawget|rawset
-                                   |loadstring|dofile|collectgarbage
+                                   |loadstring|dofile|loadfile|collectgarbage
                                    |rawlen|select|arg|bit|debug|ngx|ndk|newproxy)$/x)
                     or (exists($allow_rules{$name})) )
                 {
