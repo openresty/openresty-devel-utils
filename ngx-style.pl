@@ -147,6 +147,13 @@ for my $file (@ARGV) {
             #print "enter macro_defined\n";
         }
 
+        # check the return type of function definition.
+        if ($line =~ /^(\w+) .*\(.*\)(?!;)\n/) {
+            if ($1 ne "typedef") {
+                output "the return type should be on a separate line";
+            }
+        }
+
         my $space = 0;
         if ($line =~ /^( *).*$/) {
             $space = length $1;
