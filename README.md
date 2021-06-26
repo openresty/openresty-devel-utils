@@ -10,6 +10,7 @@ Table of Contents
 * [Description](#description)
     * [ngx-build](#ngx-build)
     * [reindex](#reindex)
+    * [ngx-style.pl](#ngx-style.pl)
 * [Copyright & License](#copyright--license)
 
 Description
@@ -256,6 +257,38 @@ its default option is `1`.
 ```
 reindex -b 0 /path/to/module/t*.t
 ```
+
+[Back to TOC](#table-of-contents)
+
+ngx-style.pl
+---------
+
+The `ngx-style.pl` is used to unify the code style of nginx C source code, and it also work for other nginx C modules,
+such as all C modules under [the git reposity of Openresty](https://github.com/openresty).
+You can install this tool like tools mentioned above.
+
+You can run `ngx-style.pl` like this:
+```
+ngx-style.pl /path/to/module/src/*
+```
+
+If a problem is found, the problem file, the description of the problem, and the line number and content of the problem
+will be reported. Below is an example:
+```
+src/ngx_http_lua_variable.c:
+found line tailing spaces
+22:     ngx_uint_t                   hash;   
+```
+
+The `ngx-style.pl` will check the code style problems like these:
+* Check that each line does not end with DOS line ending, or report `found DOS line ending`.
+* Check that each line does not end with space, or report `found line tailing spaces`.
+* Check if there is no space before the comma in each line, or report `do not need space before ,`.
+* Check if every line has spaces after the comma, or report `need one space after ,`.
+* Check if every line has spaces after the right parenthesis, or report `need one space after )`.
+* ... ...
+
+We will continue to update this rule base on the issues we find, and your commit is wellcome.
 
 [Back to TOC](#table-of-contents)
 
