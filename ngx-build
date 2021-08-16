@@ -24,10 +24,6 @@ if (@ARGV == 0) {
 }
 
 my $force = $opts{f};
-if ($force) {
-    shift;
-}
-
 my $patch = $opts{p};
 if ($patch) {
     $patch = File::Spec->rel2abs($patch);
