@@ -237,7 +237,6 @@ if [ -d src ]; then
     tfiles=`find -L t -name '*.t'`
 
     ack -l '\r\n' $tfiles /dev/null
-    ack '^master_on' $tfiles /dev/null
     ack '=== TEST \d+\s+' $tfiles /dev/null
     ack '\--- *(?:ONLY|LAST)' $tfiles /dev/null
     ack '^\s*plan\s+tests\s*=>.*?repeat_each\(\d+\)' $tfiles /dev/null
