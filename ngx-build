@@ -24,10 +24,6 @@ if (@ARGV == 0) {
 }
 
 my $force = $opts{f};
-if ($force) {
-    shift;
-}
-
 my $patch = $opts{p};
 if ($patch) {
     $patch = File::Spec->rel2abs($patch);
@@ -533,6 +529,12 @@ sub apply_patches {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         warn "applying patch for the NGINX resolver security vulnerability (CVE-2021-23017)";
         shell("patch -p0 < $root/../openresty/patches/patch.2021.resolver.txt");
+        chdir ".." or die "cannot switch to ..\n";
+    }
+
+    if ($ver ge '001019003') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process_connections.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 }
