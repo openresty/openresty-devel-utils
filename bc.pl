@@ -10,4 +10,5 @@ if ($@) {
     die "$@\n";
 }
 
-print "$res\n"
+print "$res\n";
+printf "%#x\n", $res;
