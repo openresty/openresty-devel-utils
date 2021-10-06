@@ -1,0 +1,17 @@
+diff -rup Test-Harness-3.42/lib/TAP/Formatter/Base.pm Test-Harness-3.42-patched/lib/TAP/Formatter/Base.pm
+--- Test-Harness-3.42/lib/TAP/Formatter/Base.pm	2018-03-19 11:20:50.000000000 -0700
++++ Test-Harness-3.42-patched/lib/TAP/Formatter/Base.pm	2021-05-22 21:59:16.073000000 -0700
+@@ -355,7 +355,12 @@ sub summary {
+         }
+     }
+     my $files = @$tests;
+-    $self->_output("Files=$files, Tests=$total, $runtime\n");
++    my $fails = $total - $passed;
++    if ($fails > 0) {
++        $self->_output("Files=$files, Tests=$total, Fails=$fails, $runtime\n");
++    } else {
++        $self->_output("Files=$files, Tests=$total, $runtime\n");
++    }
+     my $status = $aggregate->get_status;
+     $self->_output("Result: $status\n");
+ }
