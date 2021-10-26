@@ -320,7 +320,7 @@ sub apply_patches {
     }
     chdir ".." or die "cannot switch to ..\n";
 
-    if ($ver ge '001017008') {
+    if ($ver ge '001017008' && $ver lt '001021000') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-static_mod_escape_loc_hdr.patch");
         chdir ".." or die "cannot switch to ..\n";
