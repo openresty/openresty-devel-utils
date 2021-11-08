@@ -23,8 +23,13 @@ fi
 if [ -d src ]; then
     echo "Checking sources in $PWD/src"
 
-    cfiles=`find -L src -name 'ngx_*.[ch]'`
-    hfiles=`find -L src -name 'ngx_*.h'`
+    find_opts=""
+    if [ -f .ngx-releng.ignore ]; then
+        find_opts=`awk '{printf("! -name %s ", $1)}' .ngx-releng.ignore`
+    fi
+
+    cfiles=`find -L src -name 'ngx_*.[ch]' $find_opts`
+    hfiles=`find -L src -name 'ngx_*.h' $find_opts`
 
     #ack '/\*  +' src /dev/null && exit 1
     ack '(?<=\#define)\s*DDEBUG\s*[1-9]' src /dev/null
