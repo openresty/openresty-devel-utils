@@ -99,7 +99,7 @@ for my $opt (@opts) {
 
             } else {
                 # prepend asan opt
-                $opt =~ s/^(--with-cc-opt=)(.*)/$1 $build_asan $2/;
+                $opt =~ s/^(--with-cc-opt=)(.*)/${1}$build_asan $2/;
             }
 
             $found_cc_opt = 1;
@@ -110,7 +110,7 @@ for my $opt (@opts) {
 
             } else {
                 # prepend asan opt
-                $opt =~ s/^(--with-ld-opt=)(.*)/$1 $build_asan $2/;
+                $opt =~ s/^(--with-ld-opt=)(.*)/${1}$build_asan $2/;
             }
 
             $found_ld_opt = 1;
