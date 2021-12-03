@@ -81,30 +81,34 @@ for my $opt (@opts) {
         }
     }
 
-    if (defined($optimize) || defined $build_asan) {
+    if (defined $optimize) {
         if ($opt =~ /^--with-cc-opt=/) {
             if ($opt =~ s/-O\d?\b/$optimize/g) {
 
             } else {
                 $opt .= " $optimize";
             }
+        }
+    }
 
+    if (defined $build_asan) {
+        if ($opt =~ /^--with-cc-opt=/) {
             if ($opt =~ s/-fsanitize=\w+\b/$build_asan/g) {
 
             } else {
                 # prepend asan opt
-                $opt = "$build_asan $opt";
+                $opt =~ s/^(--with-cc-opt=)(.*)/$1 $build_asan $2/;
             }
 
             $found_cc_opt = 1;
         }
 
-        if (defined($build_asan) && $opt =~ /^--with-ld-opt=/) {
+        if ($opt =~ /^--with-ld-opt=/) {
             if ($opt =~ s/-fsanitize=\w+\b/$build_asan/g) {
 
             } else {
                 # prepend asan opt
-                $opt = "$build_asan $opt";
+                $opt =~ s/^(--with-ld-opt=)(.*)/$1 $build_asan $2/;
             }
 
             $found_ld_opt = 1;
