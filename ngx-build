@@ -15,6 +15,7 @@ my $no_debug = $ENV{NGX_BUILD_NO_DEBUG};
 my $cc_opts = $ENV{NGX_BUILD_CC_OPTS};
 my $ld_opts = $ENV{NGX_BUILD_LD_OPTS};
 my $extra_config_opts = $ENV{NGX_BUILD_EXTRA_CONFIG_OPTS};
+my $build_asan = $ENV{NGX_BUILD_ASAN} ? "-fsanitize=address" : undef;
 
 my %opts;
 getopts("fp:", \%opts) or usage();
@@ -67,7 +68,7 @@ for (@opts) {
 
 push @opts, '--with-poll_module';
 
-my $found_cc_opt;
+my ($found_cc_opt, $found_ld_opt);
 my @new_opts;
 for my $opt (@opts) {
     if ($no_debug && $opt eq '--with-debug') {
@@ -80,16 +81,33 @@ for my $opt (@opts) {
         }
     }
 
-    if (defined $optimize) {
+    if (defined($optimize) || defined $build_asan) {
         if ($opt =~ /^--with-cc-opt=/) {
             if ($opt =~ s/-O\d?\b/$optimize/g) {
-                $found_cc_opt = 1;
 
             } else {
                 $opt .= " $optimize";
             }
 
+            if ($opt =~ s/-fsanitize=\w+\b/$build_asan/g) {
+
+            } else {
+                # prepend asan opt
+                $opt = "$build_asan $opt";
+            }
+
             $found_cc_opt = 1;
+        }
+
+        if (defined($build_asan) && $opt =~ /^--with-ld-opt=/) {
+            if ($opt =~ s/-fsanitize=\w+\b/$build_asan/g) {
+
+            } else {
+                # prepend asan opt
+                $opt = "$build_asan $opt";
+            }
+
+            $found_ld_opt = 1;
         }
     }
 
@@ -116,12 +134,32 @@ if (defined $cc) {
     push @opts, "--with-cc=$cc";
 }
 
-if (defined $optimize && !$found_cc_opt) {
-    if (defined $cc_opts) {
-        $cc_opts .= " $optimize";
+if (!$found_cc_opt) {
+    if ($optimize) {
+        if (defined $cc_opts) {
+            $cc_opts .= " $optimize";
+
+        } else {
+            $cc_opts = $optimize;
+        }
+    }
+
+    if ($build_asan) {
+        if (defined $cc_opts) {
+            $cc_opts .= "$build_asan $cc_opts";
+
+        } else {
+            $cc_opts = $build_asan;
+        }
+    }
+}
+
+if (!$found_ld_opt && defined $build_asan) {
+    if (defined $ld_opts) {
+        $ld_opts .= "$build_asan $ld_opts";
 
     } else {
-        $cc_opts = $optimize;
+        $ld_opts = $build_asan;
     }
 }
 
