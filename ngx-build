@@ -89,6 +89,8 @@ for my $opt (@opts) {
                 $opt .= " $optimize";
             }
         }
+
+        $found_cc_opt = 1;
     }
 
     if (defined $build_asan) {
