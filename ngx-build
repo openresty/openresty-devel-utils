@@ -95,11 +95,17 @@ for my $opt (@opts) {
 
     if (defined $build_asan) {
         if ($opt =~ /^--with-cc-opt=/) {
-            if ($opt =~ s/-fsanitize=\w+\b/$build_asan/g) {
+            if ($opt =~ s/-fsanitize=\w+\b/$build_asan/g ) {
 
             } else {
                 # prepend asan opt
                 $opt =~ s/^(--with-cc-opt=)(.*?)/${1}$build_asan $2/;
+            }
+
+            if ($opt =~ s/-f(no-)?omit-frame-pointer/-fno-omit-frame-pointer/g) {
+
+            } else {
+                $opt =~ s/^(--with-cc-opt=)(.*?)/${1}-fno-omit-frame-pointer $2/;
             }
 
             $found_cc_opt = 1;
@@ -152,10 +158,10 @@ if (!$found_cc_opt) {
 
     if ($build_asan) {
         if (defined $cc_opts) {
-            $cc_opts .= "$build_asan $cc_opts";
+            $cc_opts .= "$build_asan -fno-omit-frame-pointer $cc_opts";
 
         } else {
-            $cc_opts = $build_asan;
+            $cc_opts = "$build_asan -fno-omit-frame-pointer";
         }
     }
 }
