@@ -102,7 +102,7 @@ for my $file (@ARGV) {
         }
 
         if ($line =~ /^typedef struct \w+( *)(\w+);/) {
-            if (length($1) != 2) {
+            if (length($1) < 2) {
                 output "need two space before $2";
             }
         }
