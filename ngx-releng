@@ -7,13 +7,13 @@ cd $DIR
 README_FILE=(README.*)
 
 if [ -f $README_FILE ]; then
-    wiki_file=`perl -e 'print glob "doc/*.wiki"'`
-    if [ -n "$wiki_file" -a  -f "$wiki_file" ]; then
-        echo "Generating $README_FILE"
-        (set -x; wiki2markdown.pl $wiki_file > $README_FILE 2>/dev/null || exit 1)
-        #wiki2pod.pl $wiki_file > /tmp/a.pod || exit 1
-        #pod2text /tmp/a.pod > README || exit 1
-    fi
+    #wiki_file=`perl -e 'print glob "doc/*.wiki"'`
+    #if [ -n "$wiki_file" -a  -f "$wiki_file" ]; then
+    #    echo "Generating $README_FILE"
+    #    (set -x; wiki2markdown.pl $wiki_file > $README_FILE 2>/dev/null || exit 1)
+    #    #wiki2pod.pl $wiki_file > /tmp/a.pod || exit 1
+    #    #pod2text /tmp/a.pod > README || exit 1
+    #fi
 
     grep -Pzo '(?<=This document describes).*(?:-nginx-module|ngx_\w+)\s*\[v\d+\.\d[^\s\]]*' $README_FILE \
         | tr '\n' ' ' \
