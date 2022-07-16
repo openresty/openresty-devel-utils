@@ -587,6 +587,12 @@ sub apply_patches {
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process_connections.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+    
+    if ($ver ge '001021004'){
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process_thread_pool.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
