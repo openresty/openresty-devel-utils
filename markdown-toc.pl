@@ -1,8 +1,23 @@
 #!/usr/bin/env perl
 
+use v5.10.1;
 use strict;
 use warnings;
+
+use Getopt::Std qw/ getopts /;
 use File::Copy qw(move);
+
+sub usage ($);
+
+my %opts;
+getopts 'hf', \%opts
+    or usage 1;
+
+if ($opts{h}) {
+    usage 0;
+}
+
+my $as_first_sec = $opts{f};
 
 my $infile = shift or
     die "usage: $0 <infile>\n";
@@ -54,7 +69,7 @@ while (1) {
         next;
     }
 
-    if ($s =~ /\G^(\S[^\n]*)\n([-=])+\n/gsmc) {
+    if ($s =~ /\G^(\S[^\n]*)\n([-=]){2,}\n/gsmc) {
         my ($title, $bar) = ($1, $2);
 
         warn "$title\n";
@@ -116,8 +131,18 @@ print $out $preamble;
 my $wrote_toc;
 for my $sec (@sections) {
     my ($title, $src) = @$sec;
-    if ($title eq 'Table of Contents') {
+    if ($title =~ /^(?:\# )?Table of Contents$/) {
         # skip this section
+        next;
+    }
+
+    if ($as_first_sec) {
+        if (!$wrote_toc) {
+            print $out "# Table of Contents\n\n$toc\n";
+            $wrote_toc = 1;
+        }
+
+        print $out $src;
         next;
     }
 
@@ -132,7 +157,7 @@ for my $sec (@sections) {
     }
 
     if (!$wrote_toc) {
-        print $out "Table of Contents\n=================\n\n$toc\n";
+        print $out "# Table of Contents\n\n$toc\n";
         $wrote_toc = 1;
     }
 }
@@ -151,4 +176,24 @@ sub gen_anchor {
 sub gen_toc ($) {
     my $s = shift;
     return $toc;
+}
+
+sub usage ($) {
+    my $rc = shift;
+    my $msg = <<_EOC_;
+Usage: $0 [-h] [-f] MD_FILE
+
+Options:
+    -f      Insert TOC before the first section title
+            (by default, inserting before the 2nd)
+    -h      Print this help.
+_EOC_
+
+    if ($rc == 0) {
+        print $msg;
+        exit 0;
+    }
+
+    warn $msg;
+    exit $rc;
 }
