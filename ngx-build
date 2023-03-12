@@ -64,6 +64,7 @@ if (defined $extra_config_opts) {
 for (@opts) {
     # TODO: we can process paths in other options as well
     s/^(--add-module=)(\S+)/$1 . Cwd::realpath($2)/ge;
+    s/^(--add-dynamic-module=)(\S+)/$1 . Cwd::realpath($2)/ge;
 }
 
 push @opts, '--with-poll_module';
