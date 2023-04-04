@@ -198,7 +198,8 @@ sub process_file {
                                    |pairs|ipairs|assert|module|package
                                    |coroutine|[gs]etfenv|next|rawget|rawset
                                    |loadstring|dofile|loadfile|collectgarbage
-                                   |rawlen|select|arg|bit|debug|ngx|ndk|newproxy)$/x)
+                                   |rawlen|select|arg|bit|debug|ngx|ndk|newproxy
+                                   |_VERSION|utf8)$/x)
                     or (exists($allow_rules{$name})) )
                 {
                     next;
