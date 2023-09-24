@@ -342,7 +342,7 @@ for my $file (@ARGV) {
 
         } elsif ($should_not_empty) {
             if ($line =~ m{^\r?\n$}) {
-                output "too many blank lines between functions, expect tow";
+                output "too many blank lines between functions, expect two";
             }
 
             undef $should_not_empty;
