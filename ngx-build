@@ -594,6 +594,14 @@ sub apply_patches {
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process_thread_pool.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    if ($ver ge '001009005' && $ver le '001025002') {
+        # 1.9.5 to 1.25.2 (included) are vulnerable
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        warn "applying the patch for NGINX security vulnerability (CVE-2023-44487)";
+        shell("patch -p1 < $root/../openresty/patches/patch.2023.h2.txt");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
