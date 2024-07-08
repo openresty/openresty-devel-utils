@@ -520,6 +520,7 @@ sub apply_patches {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process.patch");
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-balancer_status_code.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-balancer_pool_max_retry.patch");
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-builtin_error_page_footer.patch");
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-delayed_posted_events.patch");
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-single_process_graceful_exit.patch");
