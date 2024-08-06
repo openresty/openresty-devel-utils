@@ -608,6 +608,12 @@ sub apply_patches {
         shell("patch -p1 < $root/../openresty/patches/nginx-$version-balancer_pool_max_retry.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    if ($ver ge '001027000'){
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $root/../openresty/patches/nginx-$version-initialize_quic_transport_id_variable.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
