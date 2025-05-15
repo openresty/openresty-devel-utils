@@ -264,13 +264,13 @@ sub apply_patches {
     }
 
     unless ($ver lt '001009003') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-always_enable_cc_feature_tests.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-always_enable_cc_feature_tests.patch");
     }
 
     if ($ver lt '001000014' || ($ver ge '001001000' && $ver lt '001001017')) {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         warn "applying the null char fixes security patch";
-        shell("patch -p0 -l < $root/../openresty/patches/nginx-$version-null_character_fixes.patch");
+        shell("patch -p0 -l < $root/../openresty/patches/nginx/$version/nginx-$version-null_character_fixes.patch");
         chdir "..";
     }
 
@@ -291,172 +291,172 @@ sub apply_patches {
     unless ($ver ge '001001015') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         warn "applying subrequest cycle protection patch";
-        shell("patch -p1 -l < $root/../openresty/patches/nginx-$version-subrequest_loop.patch");
+        shell("patch -p1 -l < $root/../openresty/patches/nginx/$version/nginx-$version-subrequest_loop.patch");
         chdir "..";
     }
 
     warn "applying the upstream_pipelining patch...\n";
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../openresty/patches/nginx-$version-upstream_pipelining.patch");
+    shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-upstream_pipelining.patch");
     chdir "..";
 
     warn "applying no-error-page patch...\n";
-    shell("patch -p0 < $root/../openresty/patches/nginx-$version-no_error_pages.patch");
+    shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-no_error_pages.patch");
 
     unless ($ver ge '001001016') {
         warn "applying the max_subrequests patch... ($ver)\n";
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-max_subrequests.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-max_subrequests.patch");
     }
 
     unless ($ver ge '001001011' or ($ver ge '001000012' and $ver le '001001000')) {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-variable_header_ignore_no_hash.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-variable_header_ignore_no_hash.patch");
     }
 
     unless ($ver ge '001002001') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-reset_wev_handler_in_named_locations.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-reset_wev_handler_in_named_locations.patch");
 
         unless ($ver lt '1009002') {
-            shell("patch -p0 < $root/../openresty/patches/nginx-$version-filter_finalize_hang.patch");
+            shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-filter_finalize_hang.patch");
         }
     }
 
     unless ($ver ge '001002003') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-add_core_vars_polluting_globals.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-add_core_vars_polluting_globals.patch");
 
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-resolver_debug_log_overflow.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-resolver_debug_log_overflow.patch");
 
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-poll_del_event_at_exit.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-poll_del_event_at_exit.patch");
     }
 
     unless ($ver ge '001007009') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-location_if_inherits_proxy.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-location_if_inherits_proxy.patch");
     }
 
     unless ($ver ge '001001006') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-named_location_clear_mods_ctx.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-named_location_clear_mods_ctx.patch");
     }
 
-    #shell("patch -p0 < $root/../openresty/patches/nginx-$version-allow_request_body_updating.patch");
+    #shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-allow_request_body_updating.patch");
 
     unless ($ver ge '001001009' or ($ver ge '001000012' and $ver le '001001000')) {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-epoll_check_stale_wev.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-epoll_check_stale_wev.patch");
     }
-    #shell("patch -p0 < $root/../openresty/patches/nginx-$version-gzip_ok_invalid_read_fix.patch");
+    #shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-gzip_ok_invalid_read_fix.patch");
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../openresty/patches/nginx-$version-log_escape_non_ascii.patch");
+    shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-log_escape_non_ascii.patch");
     chdir ".." or die "cannot switch to ..\n";
 
     unless ($ver ge '001005003') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-upstream_truncation.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-upstream_truncation.patch");
     }
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_cert_cb_yield.patch");
+    shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-ssl_cert_cb_yield.patch");
     chdir ".." or die "cannot switch to ..\n";
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     if ($ver ge '001017001') {
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_sess_cb_yield.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-ssl_sess_cb_yield.patch");
 
     } else {
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_pending_session.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-ssl_pending_session.patch");
     }
 
     chdir ".." or die "cannot switch to ..\n";
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     if ($ver ge '001019009') {
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-ssl_client_hello_cb_yield.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-ssl_client_hello_cb_yield.patch");
     }
     chdir ".." or die "cannot switch to ..\n";
 
     if ($ver ge '001017008' && $ver lt '001021000') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-static_mod_escape_loc_hdr.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-static_mod_escape_loc_hdr.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001005003') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-channel-uninit-params.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-channel-uninit-params.patch");
     }
 
     unless ($ver ge '001002006') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-upstream_test_connect_kqueue.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-upstream_test_connect_kqueue.patch");
     }
 
     unless ($ver ge '001005013') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-slab_alloc_no_memory_as_info.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-slab_alloc_no_memory_as_info.patch");
     }
 
     unless ($ver ge '001000008') {
         warn "applying request-body-preread patch...\n";
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-request_body_preread_fix.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-request_body_preread_fix.patch");
 
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         warn "applying request-body-in-single-buf patch...\n";
-        shell("patch -p1 -l < $root/../openresty/patches/nginx-$version-request_body_in_single_buf.patch");
+        shell("patch -p1 -l < $root/../openresty/patches/nginx/$version/nginx-$version-request_body_in_single_buf.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001002007') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-resolver_wev_handler_segfault_with_poll.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-resolver_wev_handler_segfault_with_poll.patch");
     }
 
     unless ($ver ge '001002008') {
         warn "applying the run_posted_requests_in_resolver patch...\n";
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-run_posted_requests_in_resolver.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-run_posted_requests_in_resolver.patch");
     }
 
     unless ($ver ge '001002009' || $ver ge '001003000') {
         warn "applying the cve-2013-2070 patch...\n";
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-cve-2013-2070.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-cve-2013-2070.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     #warn "applying the invalid_referer_hash patch...\n";
     unless ($ver ge '001005003') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-invalid_referer_hash.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-invalid_referer_hash.patch");
     }
 
     unless ($ver ge '001005003') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-gzip_buffered_bug.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-gzip_buffered_bug.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001005003') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-unix_socket_accept_over_read.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-unix_socket_accept_over_read.patch");
     }
 
     unless ($ver ge '001005007') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-gzip_flush_bug.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-gzip_flush_bug.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001007008') {
-        shell("patch -p0 < $root/../openresty/patches/nginx-$version-cache_lock_hang_in_subreq.patch");
+        shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-cache_lock_hang_in_subreq.patch");
     }
 
-    shell("patch -p0 < $root/../openresty/patches/nginx-$version-proxy_host_port_vars.patch");
+    shell("patch -p0 < $root/../openresty/patches/nginx/$version/nginx-$version-proxy_host_port_vars.patch");
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../openresty/patches/nginx-$version-cache_manager_exit.patch");
+    shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-cache_manager_exit.patch");
     chdir ".." or die "cannot switch to ..\n";
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../openresty/patches/nginx-$version-larger_max_error_str.patch");
+    shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-larger_max_error_str.patch");
     chdir ".." or die "cannot switch to ..\n";
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../openresty/patches/nginx-$version-pcre_conf_opt.patch");
+    shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-pcre_conf_opt.patch");
     chdir ".." or die "cannot switch to ..\n";
 
     unless ($ver ge '0010070010') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-upstream_filter_finalize.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-upstream_filter_finalize.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
@@ -468,63 +468,63 @@ sub apply_patches {
 
     unless ($ver ge '001005009') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-resolve-names-with-a-trailing-dot.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-resolve-names-with-a-trailing-dot.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001007001') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-setting_args_invalidates_uri.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-setting_args_invalidates_uri.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001007002') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-slab_defrag.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-slab_defrag.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver ge '001007004') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-proxy_ssl_handshake_timer.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-proxy_ssl_handshake_timer.patch");
         chdir ".." or die "cannot switch to ..\n";
 
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-geoip_init_var_fields.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-geoip_init_var_fields.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver le '001007004' or $ver ge '001007008') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-resolver_del_event_invalid_read.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-resolver_del_event_invalid_read.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     unless ($ver le '001007004' || $ver ge '001007007') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-hash_overflow.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-hash_overflow.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     if ($ver eq '001009007') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-resolver_security_fixes.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-resolver_security_fixes.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-    shell("patch -p1 < $root/../openresty/patches/nginx-$version-upstream_timeout_fields.patch");
+    shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-upstream_timeout_fields.patch");
     chdir ".." or die "cannot switch to ..\n";
 
     if ($ver ge '001011002') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-balancer_status_code.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-builtin_error_page_footer.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-delayed_posted_events.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-single_process_graceful_exit.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-intercept_error_log.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-safe_resolver_ipv6_option.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-privileged_agent_process.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-balancer_status_code.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-builtin_error_page_footer.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-delayed_posted_events.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-single_process_graceful_exit.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-intercept_error_log.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-safe_resolver_ipv6_option.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
@@ -536,19 +536,19 @@ sub apply_patches {
 
     if ($ver ge '001013006') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-init_cycle_pool_release.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_ssl_preread_no_skip.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-resolver_conf_parsing.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-socket_cloexec.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-daemon_destroy_pool.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-init_cycle_pool_release.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-stream_ssl_preread_no_skip.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-resolver_conf_parsing.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-socket_cloexec.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-daemon_destroy_pool.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     if ($ver ge '001013003') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_balancer_export.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_proxy_get_next_upstream_tries.patch");
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-stream_proxy_timeout_fields.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-stream_balancer_export.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-stream_proxy_get_next_upstream_tries.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-stream_proxy_timeout_fields.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
@@ -561,7 +561,7 @@ sub apply_patches {
 
     if ($ver ge '001017001') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-reuseport_close_unused_fds.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-reuseport_close_unused_fds.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
@@ -585,13 +585,13 @@ sub apply_patches {
 
     if ($ver ge '001019003') {
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process_connections.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-privileged_agent_process_connections.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     if ($ver ge '001021004'){
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-privileged_agent_process_thread_pool.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-privileged_agent_process_thread_pool.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
@@ -605,13 +605,13 @@ sub apply_patches {
 
     if ($ver ge '001019001'){
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-balancer_pool_max_retry.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-balancer_pool_max_retry.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
     if ($ver ge '001027000'){
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-initialize_quic_transport_id_variable.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-initialize_quic_transport_id_variable.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 
@@ -619,7 +619,7 @@ sub apply_patches {
         # < 1.27.4 are vulnerable
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         warn "applying the patch for NGINX security vulnerability (CVE-2025-23419)";
-        shell("patch -p1 < $root/../openresty/patches/nginx-$version-CVE-2025-23419.patch");
+        shell("patch -p1 < $root/../openresty/patches/nginx/$version/nginx-$version-CVE-2025-23419.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 }
