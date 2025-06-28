@@ -623,6 +623,12 @@ sub apply_patches {
         shell("patch -p1 < $or_patch_dir/nginx-$version-CVE-2025-23419.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    if ($ver ge '001027001'){
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $or_patch_dir/nginx-$version-quic_ssl_lua_yield.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
