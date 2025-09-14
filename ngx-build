@@ -369,6 +369,7 @@ sub apply_patches {
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     if ($ver ge '001019009') {
         shell("patch -p1 < $or_patch_dir/nginx-$version-ssl_client_hello_cb_yield.patch");
+        shell("patch -p1 < $or_patch_dir/nginx-$version-proxy_ssl_verify_cb_yield.patch");
     }
     chdir ".." or die "cannot switch to ..\n";
 
