@@ -354,9 +354,7 @@ sub apply_patches {
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     shell("patch -p1 < $or_patch_dir/nginx-$version-ssl_cert_cb_yield.patch");
-    chdir ".." or die "cannot switch to ..\n";
 
-    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     if ($ver ge '001017001') {
         shell("patch -p1 < $or_patch_dir/nginx-$version-ssl_sess_cb_yield.patch");
 
@@ -364,11 +362,11 @@ sub apply_patches {
         shell("patch -p1 < $or_patch_dir/nginx-$version-ssl_pending_session.patch");
     }
 
-    chdir ".." or die "cannot switch to ..\n";
-
-    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     if ($ver ge '001019009') {
         shell("patch -p1 < $or_patch_dir/nginx-$version-ssl_client_hello_cb_yield.patch");
+    }
+
+    if ($ver ge '001027001') {
         shell("patch -p1 < $or_patch_dir/nginx-$version-proxy_ssl_verify_cb_yield.patch");
     }
     chdir ".." or die "cannot switch to ..\n";
@@ -446,13 +444,7 @@ sub apply_patches {
 
     chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     shell("patch -p1 < $or_patch_dir/nginx-$version-cache_manager_exit.patch");
-    chdir ".." or die "cannot switch to ..\n";
-
-    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     shell("patch -p1 < $or_patch_dir/nginx-$version-larger_max_error_str.patch");
-    chdir ".." or die "cannot switch to ..\n";
-
-    chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
     shell("patch -p1 < $or_patch_dir/nginx-$version-pcre_conf_opt.patch");
     chdir ".." or die "cannot switch to ..\n";
 
