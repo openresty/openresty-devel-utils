@@ -620,6 +620,7 @@ sub apply_patches {
     if ($ver ge '001027001'){
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
         shell("patch -p1 < $or_patch_dir/nginx-$version-quic_ssl_lua_yield.patch");
+        shell("patch -p1 < $or_patch_dir/nginx-$version-http2_subreq_error_wakeup.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
 }
