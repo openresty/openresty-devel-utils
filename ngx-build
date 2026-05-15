@@ -623,6 +623,12 @@ sub apply_patches {
         shell("patch -p1 < $or_patch_dir/nginx-$version-http2_subreq_error_wakeup.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+    if ($ver ge '001031000'){
+        # supress nginx memory leak warning
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+        shell("patch -p1 < $or_patch_dir/nginx-$version-upstream_ssl_session_cleanup.patch");
+        chdir ".." or die "cannot switch to ..\n";
+    }
 }
 
 sub usage {
