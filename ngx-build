@@ -623,6 +623,21 @@ sub apply_patches {
         shell("patch -p1 < $or_patch_dir/nginx-$version-http2_subreq_error_wakeup.patch");
         chdir ".." or die "cannot switch to ..\n";
     }
+
+    if ($version eq '1.27.1') {
+        chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
+
+        # CVE-2026-93479 requires the earlier script engine fixes.
+        for my $cve (qw/42945 9256 42533-1 42533-2 42533-3 42533-4 42533-5
+                        15176 93479 95101 97629 97205/)
+        {
+            warn "applying the patch for NGINX security vulnerability (CVE-2026-$cve)\n";
+            shell("patch -p1 < $or_patch_dir/nginx-$version-CVE-2026-$cve.patch");
+        }
+
+        chdir ".." or die "cannot switch to ..\n";
+    }
+
     if ($ver ge '001031000'){
         # supress nginx memory leak warning
         chdir "nginx-$version" or die "cannot switch to nginx-$version\n";
